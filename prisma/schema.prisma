@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ContactData {
+  name String
+  email String
+  phone String
+  organization String?
+  title String?
+
+  user_telegramId Int @id
+  user User @relation(fields: [user_telegramId], references: [telegramId])
+
+}
+
+model User {
+  telegramId Int @id
+  username String
+  full_name String
+  role Role @default(UNREGISTERED)
+
+  contact_data ContactData?
+  problem_application ProblemApplication[]
+  area_expectations_application AreaExpectationsApplication[]
+  rented_area_requests_application RentedAreaRequestsApplication[]
+  key_project_parameters_application KeyProjectParametersApplication?
+  building_plans_application BuildingPlansApplication[]
+  booking_hall_application BookingHallApplication[]
+  innovation_proposal_application InnovationProposalApplication[]
+}
+
+model Halls {
+  id Int @default(autoincrement()) @id
+  description String
+  photo Bytes
+
+  booking_hall_application BookingHallApplication[]
+  area_expectation_application AreaExpectationsApplication[]
+}
+
+model ProblemApplication {
+  problem_application_id Int @default(autoincrement()) @id
+  problem_reason ProblemType
+  problem_main String
+  problem_adress String
+  status Status
+
+  user_telegramId Int 
+  user User @relation(fields: [user_telegramId], references: [telegramId])
+}
+
+model AreaExpectationsApplication {
+  event_application_id Int @default(autoincrement()) @id
+  event_date_time String
+  event_subject String
+  event_visitors String  
+  status Status
+
+  chosen_hall_id Int? 
+  hall Halls? @relation(fields: [chosen_hall_id], references: [id])
+
+  user_telegramId Int 
+  user User @relation(fields: [user_telegramId], references: [telegramId])
+}
+
+model RentedAreaRequestsApplication {
+  area_application_id Int @default(autoincrement()) @id
+  area_type String
+  area_premises String
+  area_rental_start String
+  status Status
+  chosen_palace Palaces?
+
+
+  user_telegramId Int 
+  user User @relation(fields: [user_telegramId], references: [telegramId])
+}
+
+model KeyProjectParametersApplication {
+  project_appliocation_id Int @default(autoincrement()) @id
+  project_stage String
+  project_crew String
+  project_volume String
+  status Status
+
+  user_telegramId Int @unique
+  user User @relation(fields: [user_telegramId], references: [telegramId])
+}
+
+model BuildingPlansApplication {
+  building_plan_id Int @default(autoincrement()) @id
+  building_premises String
+  building_start String
+  status Status
+
+  user_telegramId Int 
+  user User @relation(fields: [user_telegramId], references: [telegramId])
+}
+
+model BookingHallApplication {
+  hall_application_id Int @default(autoincrement()) @id
+  hall_date String
+  hall_time String
+  hall_period String
+  hall_wish String
+  status Status
+
+  chosen_hall_id Int
+  hall Halls @relation(fields: [chosen_hall_id], references: [id])
+
+  user_telegramId Int 
+  user User @relation(fields: [user_telegramId], references: [telegramId])
+}
+
+model InnovationProposalApplication {
+  innovation_application_id Int @default(autoincrement()) @id
+  innovation_main String
+  innovation_idea String
+  innovation_example String
+  innovation_res String
+  innovation_involve String
+  status Status
+
+
+  user_telegramId Int 
+  user User @relation(fields: [user_telegramId], references: [telegramId])
+}
+
+enum Role {
+  UNREGISTERED
+  ADMIN
+  SUPPORT
+  RESIDENT
+  EVENTRENTER
+  EMPLOYEE
+  NONRESIDENTRENTER
+  GUEST
+}
+
+enum Status {
+  Accepted
+  Declined
+  Pending
+  Waiting
+}
+
+enum ProblemType {
+  ELECTRICITY
+  WATERSUPPLY
+  HEATING
+  COMMUNICATION
+  OTHER
+}
+
+enum Palaces {
+  CIT
+  IC
+  NVC
+  EC
+  EXPOCENTER
+}
