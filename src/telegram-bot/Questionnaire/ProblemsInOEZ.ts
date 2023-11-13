@@ -10,8 +10,7 @@ export const ProblemsInOEZQuestionnare = async (
     bot,
     call,
     message:
-      'Опишите своими словами проблему или ситуацию, требующую технического обслуживания или ремонта',
-    canPreviousMessageBeDeleted: false
+      'Опишите своими словами проблему или ситуацию, требующую технического обслуживания или ремонта'
   });
   const problemMain = await ReplayQuestionCallback(bot, call);
   await sendToUser({

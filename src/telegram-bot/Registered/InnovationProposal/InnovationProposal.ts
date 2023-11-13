@@ -26,7 +26,8 @@ export const InnovationProposal = async (
         innovation_involve: innovationInvolve,
         innovation_main: innovationMain,
         innovation_res: innovationRes,
-        user_telegramId: call.from.id
+        user_telegramId: call.from.id,
+        innovation_dispatch_date: new Date()
       }
     });
   } catch (error) {

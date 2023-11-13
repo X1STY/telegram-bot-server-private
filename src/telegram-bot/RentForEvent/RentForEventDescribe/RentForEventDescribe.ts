@@ -40,7 +40,8 @@ export const RentForEventDescribeFunc = async (
         event_visitors: eventVisitors,
         status: 'Waiting',
         user_telegramId: call.from.id,
-        chosen_hall_id: selectedHall
+        chosen_hall_id: selectedHall,
+        event_dispatch_date: new Date()
       }
     });
   } catch (error) {

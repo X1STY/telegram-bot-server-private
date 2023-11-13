@@ -58,7 +58,8 @@ export const ProjectParametersFunc = async (
           project_stage: projectStage,
           project_volume: projectValue,
           user_telegramId: call.from.id,
-          status: 'Waiting'
+          status: 'Waiting',
+          project_dispatch_date: new Date()
         }
       });
     } catch (error) {

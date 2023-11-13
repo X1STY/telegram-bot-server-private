@@ -1,4 +1,4 @@
-import { Palaces } from '@prisma/client';
+import { Palaces, ProblemType, Status } from '@prisma/client';
 
 export const pathToImageFolder: string = './static/images/';
 
@@ -35,3 +35,26 @@ export const arrayOfUK: IUK[] = [
     description: 'expocenter'
   }
 ];
+
+export const PalaceConvertor = {
+  [Palaces.CIT]: 'Центр инновационных технологий',
+  [Palaces.NVC]: 'Научно внедренческий центр',
+  [Palaces.EC]: 'Инжиниринговый центр',
+  [Palaces.IC]: 'Инженерный центр',
+  [Palaces.EXPOCENTER]: 'Экспоцентр'
+};
+
+export const StatusConvertor = {
+  [Status.Accepted]: 'Принято',
+  [Status.Declined]: 'Отклонено',
+  [Status.Pending]: 'В обработке',
+  [Status.Waiting]: 'В ожидании'
+};
+
+export const ProblemTypeConverter = {
+  [ProblemType.COMMUNICATION]: 'Интернет / Телефония / Серверные комнаты',
+  [ProblemType.ELECTRICITY]: 'Электроснабжение',
+  [ProblemType.HEATING]: 'Отопление / Кондиционирование',
+  [ProblemType.OTHER]: 'Другое - мелкий и средний ремонт',
+  [ProblemType.WATERSUPPLY]: 'Водоснабжение / Канализация'
+};

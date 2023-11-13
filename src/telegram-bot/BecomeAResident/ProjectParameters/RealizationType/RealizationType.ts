@@ -28,8 +28,8 @@ export const RealizationType = async (
   });
   if (
     call.data.includes('realization_type_rent') &&
-    userData.rented_area_requests_application.length === 0 &&
-    userData.building_plans_application.length === 0
+    userData.rented_area_requests_application == null &&
+    userData.building_plans_application == null
   ) {
     bot.answerCallbackQuery(call.id);
 
@@ -46,7 +46,8 @@ export const RealizationType = async (
           area_rental_start: areaRentalStart,
           status: 'Waiting',
           user_telegramId: call.from.id,
-          chosen_palace: chosenPalace
+          chosen_palace: chosenPalace,
+          area_dispatch_date: new Date()
         }
       });
     } catch (error) {
@@ -58,8 +59,8 @@ export const RealizationType = async (
 
   if (
     call.data === 'realization_type_build' &&
-    userData.rented_area_requests_application.length === 0 &&
-    userData.building_plans_application.length === 0
+    userData.rented_area_requests_application == null &&
+    userData.building_plans_application == null
   ) {
     bot.answerCallbackQuery(call.id);
     try {
@@ -69,7 +70,8 @@ export const RealizationType = async (
           building_premises: buildingPremises,
           building_start: buildingStart,
           status: 'Waiting',
-          user_telegramId: call.from.id
+          user_telegramId: call.from.id,
+          building_dispatch_date: new Date()
         }
       });
     } catch (error) {

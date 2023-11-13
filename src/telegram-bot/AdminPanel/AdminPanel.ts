@@ -3,7 +3,6 @@ import TelegramBot from 'node-telegram-bot-api';
 import { AdminPanelMenu, MainMenu } from '../markups';
 import { findUserById } from '../bot.service';
 import { ReplayQuestionCallback } from '../ReplyQuestionCallback';
-import { registerNewUser } from '../RegisterNewUser';
 
 export const AdminPanel = async (
   bot: TelegramBot,

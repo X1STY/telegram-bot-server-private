@@ -31,9 +31,9 @@ model User {
   contact_data ContactData?
   problem_application ProblemApplication[]
   area_expectations_application AreaExpectationsApplication[]
-  rented_area_requests_application RentedAreaRequestsApplication[]
+  rented_area_requests_application RentedAreaRequestsApplication?
   key_project_parameters_application KeyProjectParametersApplication?
-  building_plans_application BuildingPlansApplication[]
+  building_plans_application BuildingPlansApplication?
   booking_hall_application BookingHallApplication[]
   innovation_proposal_application InnovationProposalApplication[]
 }
@@ -54,6 +54,10 @@ model ProblemApplication {
   problem_adress String
   status Status
 
+  problem_dispatch_date DateTime
+  problem_approval_date DateTime?
+  problem_support_id Int?
+
   user_telegramId Int 
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
@@ -64,6 +68,10 @@ model AreaExpectationsApplication {
   event_subject String
   event_visitors String  
   status Status
+
+  event_dispatch_date DateTime
+  event_approval_date DateTime?
+  event_support_id Int?
 
   chosen_hall_id Int? 
   hall Halls? @relation(fields: [chosen_hall_id], references: [id])
@@ -80,8 +88,12 @@ model RentedAreaRequestsApplication {
   status Status
   chosen_palace Palaces?
 
+  area_dispatch_date DateTime
+  area_approval_date DateTime?
+  area_support_id Int?
 
-  user_telegramId Int 
+
+  user_telegramId Int @unique
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
@@ -91,6 +103,10 @@ model KeyProjectParametersApplication {
   project_crew String
   project_volume String
   status Status
+
+  project_dispatch_date DateTime
+  project_approval_date DateTime?
+  project_support_id Int?
 
   user_telegramId Int @unique
   user User @relation(fields: [user_telegramId], references: [telegramId])
@@ -102,7 +118,11 @@ model BuildingPlansApplication {
   building_start String
   status Status
 
-  user_telegramId Int 
+  building_dispatch_date DateTime
+  building_approval_date DateTime?
+  building_support_id Int?
+
+  user_telegramId Int @unique
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
@@ -113,6 +133,10 @@ model BookingHallApplication {
   hall_period String
   hall_wish String
   status Status
+
+  hall_dispatch_date DateTime
+  hall_approval_date DateTime?
+  hall_support_id Int?
 
   chosen_hall_id Int
   hall Halls @relation(fields: [chosen_hall_id], references: [id])
@@ -130,6 +154,9 @@ model InnovationProposalApplication {
   innovation_involve String
   status Status
 
+  innovation_dispatch_date DateTime
+  innovation_approval_date DateTime?
+  innovation_support_id Int?
 
   user_telegramId Int 
   user User @relation(fields: [user_telegramId], references: [telegramId])

@@ -41,7 +41,8 @@ const RentCorusel = async (
             hall_period: hallPeriod,
             hall_wish: hallWish,
             user_telegramId: call.from.id,
-            chosen_hall_id: chosenHallId
+            chosen_hall_id: chosenHallId,
+            hall_dispatch_date: new Date()
           }
         });
       } catch (error) {

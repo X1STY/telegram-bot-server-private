@@ -41,7 +41,7 @@ export const RentForNotResidentSendRequirementsFunc = async (
     });
     return;
   }
-  if (userData.rented_area_requests_application.length === 0) {
+  if (userData.rented_area_requests_application) {
     try {
       const { areaType, areaPremises, areaRentalStart } = await RequestedRentAreaQuestionnare(
         bot,
@@ -54,7 +54,8 @@ export const RentForNotResidentSendRequirementsFunc = async (
           area_rental_start: areaRentalStart,
           status: 'Waiting',
           user_telegramId: call.from.id,
-          chosen_palace: chosenPalace
+          chosen_palace: chosenPalace,
+          area_dispatch_date: new Date()
         }
       });
     } catch (error) {

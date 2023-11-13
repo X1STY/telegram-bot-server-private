@@ -25,7 +25,7 @@ export const IAmAlreadyRole = async (
   await bot.answerCallbackQuery(call.id);
   let contactData: IContacts;
   const role = Role[call.data.split('-')[1]];
-  if (role === 'EVENTRENTER' || role === 'GUEST') {
+  if (role === 'EVENTRENTER' || role === 'GUEST' || role === 'EMPLOYEE') {
     const user = await findUserById(call.from.id, prisma);
     if (user.role !== 'UNREGISTERED') {
       await sendToUser({

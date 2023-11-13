@@ -44,12 +44,19 @@ export const handleReport = async (
         problem_adress: problemAdress,
         problem_main: problemMain,
         status: 'Waiting',
-        user_telegramId: call.from.id
+        user_telegramId: call.from.id,
+        problem_dispatch_date: new Date()
       }
     });
   } catch (error) {
     if (error.message === 'command') return;
     else console.log(error.message);
   }
-  await sendToUser({ bot, call, message: 'Отправлено!', keyboard: BackToRegisteredMenu() });
+  await sendToUser({
+    bot,
+    call,
+    message: 'Отправлено!',
+    keyboard: BackToRegisteredMenu(),
+    canPreviousMessageBeDeleted: false
+  });
 };

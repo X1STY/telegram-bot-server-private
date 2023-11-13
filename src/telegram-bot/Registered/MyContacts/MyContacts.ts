@@ -10,7 +10,7 @@ export const MyContacts = async (
   call: TelegramBot.CallbackQuery,
   prisma: PrismaClient
 ) => {
-  if (call.data !== 'my_contacts') {
+  if (!call.data.startsWith('my_contacts')) {
     ChangeContacts(bot, call, prisma);
     return;
   }
@@ -24,13 +24,13 @@ export const MyContacts = async (
       contact_data: true
     }
   });
-
+  const from = call.data.split('-')[1];
   await sendToUser({
     bot,
     call,
     message: GetContacts(user.contact_data),
     photo: pathToImageFolder + '20.png',
-    keyboard: MyContactsMenu()
+    keyboard: MyContactsMenu(from)
   });
 };
 

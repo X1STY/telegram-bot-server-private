@@ -56,7 +56,7 @@ export const FUTURUMPage = async (bot: TelegramBot, call: TelegramBot.CallbackQu
   await sendToUser({
     bot,
     call,
-    photo: pathToImageFolder + 'v1a.png',
+    photo: pathToImageFolder + 'EC.png',
     message: 'Инфа про FUTURUM!',
     keyboard: CentersPlaceMenu('EC')
   });
@@ -71,7 +71,7 @@ export const EKCPOCENTERPage = async (bot: TelegramBot, call: TelegramBot.Callba
   await sendToUser({
     bot,
     call,
-    photo: pathToImageFolder + 'v1b.png',
+    photo: pathToImageFolder + 'EXPOCENTER.png',
     message: 'Инфа про Экспоцентр!',
     keyboard: CentersPlaceMenu('EXPOCENTER')
   });

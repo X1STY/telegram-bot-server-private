@@ -16,6 +16,7 @@ import { RentForEvent } from './RentForEvent/RentForEvent';
 import { RentForNotResident } from './RentForNotResident/RentForNotResident';
 import { ExistingOption } from './ExistingOptions/ExistingOptions';
 import { PreRegistered, Registered } from './Registered/Registered';
+import { PreSupport, SupportPage } from './SupportPanel/SupportPanel';
 process.env['NTBA_FIX_350'] = 'true'; // anti deprecated
 @Injectable()
 export class BotService implements OnModuleInit {
@@ -28,28 +29,6 @@ export class BotService implements OnModuleInit {
   botMessage = async () => {
     const bot = new TelegramBot(process.env.BOT_API, { polling: true });
     bot.setMyCommands(commands);
-
-    bot.onText(/\/getinfo/, async (msg) => {
-      const id = msg.from.id;
-      const user = await this.prisma.user.findFirst({
-        where: {
-          telegramId: id
-        },
-        include: {
-          area_expectations_application: true,
-          booking_hall_application: true,
-          building_plans_application: true,
-          contact_data: true,
-          innovation_proposal_application: true,
-          key_project_parameters_application: true,
-          problem_application: true,
-          rented_area_requests_application: true
-        }
-      });
-      const info = JSON.stringify(user, null, 2);
-      await bot.sendMessage(msg.chat.id, info);
-      return;
-    });
 
     bot.onText(/\/reset/, async (msg) => {
       const id = msg.from.id;
@@ -101,7 +80,9 @@ export class BotService implements OnModuleInit {
     bot.onText(/\/registered/, async (msg) => {
       await PreRegistered(bot, msg, this.prisma);
     });
-
+    bot.onText(/\/support/, async (msg) => {
+      await PreSupport(bot, msg, this.prisma);
+    });
     bot.onText(/\/start/, async (msg) => {
       await registerNewUser(msg, this.prisma);
 
@@ -125,7 +106,7 @@ export class BotService implements OnModuleInit {
       await AdminPanel(bot, msg, this.prisma);
     });
     bot.on('callback_query', async (call) => {
-      console.log(call.data);
+      console.log(call.from.username, call.data);
       try {
         await RentForEvent(bot, call, this.prisma);
         await InfoPageAboutZone(bot, call, this.prisma);
@@ -139,6 +120,9 @@ export class BotService implements OnModuleInit {
         //admin
         await SendMessageToAllUsers(bot, call, this.prisma);
         await CheckAppApplications(bot, call, this.prisma);
+        //
+        //support
+        await SupportPage(bot, call, this.prisma);
         //
         await backToMainMenuHandler(bot, call);
       } catch (error) {
@@ -177,9 +161,5 @@ const commands = [
   {
     command: 'reset',
     description: 'Очистить данные из БД (все заявки удаляются, роль = незарегестрирован)'
-  },
-  {
-    command: 'getinfo',
-    description: 'Посмотреть данные из БД'
   }
 ];
