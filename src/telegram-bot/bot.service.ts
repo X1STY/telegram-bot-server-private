@@ -7,10 +7,8 @@ import { pathToImageFolder } from '@/constants';
 import { BecomeAResident } from './BecomeAResident/BecomeAResident';
 import { AlreadyRegistered } from './AlreadyRegistered/AlreadyRegistered';
 import { MainMenu } from './markups';
-import { AdminPanel } from './AdminPanel/AdminPanel';
+import { AdminPage, PreAdmin } from './AdminPanel/AdminPanel';
 import { registerNewUser } from './RegisterNewUser';
-import { SendMessageToAllUsers } from './AdminPanel/SendMessageToAllUsers/SendMessageToAllUsers';
-import { CheckAppApplications } from './AdminPanel/CheckAppApplications/CheckAppApplications';
 import { MainMenuMessage } from './messages';
 import { RentForEvent } from './RentForEvent/RentForEvent';
 import { RentForNotResident } from './RentForNotResident/RentForNotResident';
@@ -83,6 +81,9 @@ export class BotService implements OnModuleInit {
     bot.onText(/\/support/, async (msg) => {
       await PreSupport(bot, msg, this.prisma);
     });
+    bot.onText(/\/admin/, async (msg) => {
+      await PreAdmin(bot, msg, this.prisma);
+    });
     bot.onText(/\/start/, async (msg) => {
       await registerNewUser(msg, this.prisma);
 
@@ -102,9 +103,6 @@ export class BotService implements OnModuleInit {
     bot.on('polling_error', (msg) => {
       console.log(msg);
     });
-    bot.on('message', async (msg) => {
-      await AdminPanel(bot, msg, this.prisma);
-    });
     bot.on('callback_query', async (call) => {
       console.log(call.from.username, call.data);
       try {
@@ -118,8 +116,7 @@ export class BotService implements OnModuleInit {
         await Registered(bot, call, this.prisma);
         //
         //admin
-        await SendMessageToAllUsers(bot, call, this.prisma);
-        await CheckAppApplications(bot, call, this.prisma);
+        await AdminPage(bot, call, this.prisma);
         //
         //support
         await SupportPage(bot, call, this.prisma);

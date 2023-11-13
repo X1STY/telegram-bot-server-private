@@ -379,16 +379,20 @@ export const ChangeUserDataMenu = (role: Role): TelegramBot.InlineKeyboardMarkup
 
 export const AdminPanelMenu = (): TelegramBot.InlineKeyboardMarkup => {
   const b1: TelegramBot.InlineKeyboardButton = {
-    text: 'Рассылка сообщения',
-    callback_data: 'send_msg_to_all'
+    text: 'Управление поддержкой',
+    callback_data: 'manage_support_agent'
   };
   const b2: TelegramBot.InlineKeyboardButton = {
-    text: 'Посмотреть все заявки',
-    callback_data: 'check_all_applications'
+    text: 'Управление постами',
+    callback_data: 'manage_posts'
+  };
+  const b3: TelegramBot.InlineKeyboardButton = {
+    text: 'Рассылка информации',
+    callback_data: 'send_information'
   };
 
   const kb: TelegramBot.InlineKeyboardMarkup = {
-    inline_keyboard: [[b1], [b2], [toMainMenuButton]]
+    inline_keyboard: [[b1], [b2], [b3]]
   };
   return kb;
 };
@@ -651,9 +655,13 @@ export const SupportPageMenu = (): TelegramBot.InlineKeyboardMarkup => {
     text: 'Мои контакты',
     callback_data: 'my_contacts-support'
   };
+  const b3: TelegramBot.InlineKeyboardButton = {
+    text: 'Сводная таблица по заявкам',
+    callback_data: 'generate_statistic-support'
+  };
 
   const kb: TelegramBot.InlineKeyboardMarkup = {
-    inline_keyboard: [[b1, b2]]
+    inline_keyboard: [[b1, b2], [b3]]
   };
   return kb;
 };

@@ -31,6 +31,7 @@ export const AllBookingApplications = async (
     await bot.deleteMessage(call.message.chat.id, call.message.message_id);
     return;
   }
+  await bot.answerCallbackQuery(call.id);
 
   const Halls = await prisma.bookingHallApplication.findMany({
     where: {

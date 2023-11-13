@@ -34,6 +34,7 @@ export const AllInnovationApplications = async (
     await bot.deleteMessage(call.message.chat.id, call.message.message_id);
     return;
   }
+  await bot.answerCallbackQuery(call.id);
 
   const Halls = await prisma.innovationProposalApplication.findMany({
     where: {
@@ -189,7 +190,7 @@ const InnovationApplicationsCorusel = async (
 
 const InnovationToShortString = async (application: application): Promise<string> => {
   let resultString = '';
-  resultString += `Идея рационализаторского предложения: ${application.innovation_idea}}\n`;
+  resultString += `Идея рационализаторского предложения: ${application.innovation_idea}\n`;
   resultString += `Которая будет решать проблему: : ${application.innovation_main}\n`;
 
   resultString += `Статус заявки: ${StatusConvertor[application.status]}`;
@@ -198,11 +199,11 @@ const InnovationToShortString = async (application: application): Promise<string
 
 const InnovationToLongString = async (application: application): Promise<string> => {
   let resultString = '';
-  resultString += `Идея рационализаторского предложения: ${application.innovation_main}}\n`;
+  resultString += `Идея рационализаторского предложения: ${application.innovation_main}\n`;
   resultString += `Которая будет решать проблему: : ${application.innovation_idea}\n`;
-  resultString += `Идея рационализаторского предложения: ${application.innovation_example}}\n`;
+  resultString += `Идея рационализаторского предложения: ${application.innovation_example}\n`;
   resultString += `Которая будет решать проблему: : ${application.innovation_res}\n`;
-  resultString += `Идея рационализаторского предложения: ${application.innovation_involve}}\n`;
+  resultString += `Идея рационализаторского предложения: ${application.innovation_involve}\n`;
 
   resultString += application.user.username
     ? `Имя пользователя телеграм: @${application.user.username}\n`

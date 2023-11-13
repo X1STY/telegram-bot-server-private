@@ -31,6 +31,7 @@ export const AllEventApplications = async (
     await bot.deleteMessage(call.message.chat.id, call.message.message_id);
     return;
   }
+  await bot.answerCallbackQuery(call.id);
 
   const Halls = await prisma.areaExpectationsApplication.findMany({
     where: {
@@ -207,7 +208,7 @@ const EventToLongString = async (
   prisma: PrismaClient
 ): Promise<string> => {
   let resultString = '';
-  resultString += `Дата и время аренды зала: ${application.event_date_time}}\n`;
+  resultString += `Дата и время аренды зала: ${application.event_date_time}\n`;
   resultString += `Количество поситителей: ${application.event_visitors}\n`;
   resultString += `Тема мероприятия: ${application.event_subject}\n`;
   if (application.chosen_hall_id) {

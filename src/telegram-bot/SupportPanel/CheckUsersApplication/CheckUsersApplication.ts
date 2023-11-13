@@ -29,6 +29,7 @@ export const CheckUsersApplication = async (
     await bot.deleteMessage(call.message.chat.id, call.message.message_id);
     return;
   }
+  await bot.answerCallbackQuery(call.id);
 
   await sendToUser({
     bot,

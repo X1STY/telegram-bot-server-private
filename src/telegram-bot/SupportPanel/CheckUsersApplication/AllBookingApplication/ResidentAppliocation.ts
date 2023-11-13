@@ -33,6 +33,7 @@ export const AllResidentApplications = async (
     await bot.deleteMessage(call.message.chat.id, call.message.message_id);
     return;
   }
+  await bot.answerCallbackQuery(call.id);
 
   const Halls = await prisma.user.findMany({
     include: {
@@ -65,8 +66,6 @@ export const AllResidentApplications = async (
       }
     }
   });
-
-  console.log(Halls);
 
   if (Halls.length === 0) {
     await sendToUser({

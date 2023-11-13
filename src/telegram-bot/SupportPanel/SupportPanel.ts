@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { SupportPageMenu } from '../markups';
 import { CheckUsersApplication } from './CheckUsersApplication/CheckUsersApplication';
+import { findUserById } from '../bot.service';
+import { GenerateStatistic } from './GenerateStatistic/GenerateStatistic';
 
 export const PreSupport = async (
   bot: TelegramBot,
@@ -30,15 +32,13 @@ export const SupportPage = async (
   call: TelegramBot.CallbackQuery,
   prisma: PrismaClient
 ) => {
+  const user = await findUserById(call.from.id, prisma);
+
   if (call.data !== 'support') {
     CheckUsersApplication(bot, call, prisma);
+    GenerateStatistic(bot, call, prisma);
     return;
   }
-  const user = await prisma.user.findFirst({
-    where: {
-      telegramId: call.from.id
-    }
-  });
   if (user.role !== 'SUPPORT') {
     await bot.deleteMessage(call.message.chat.id, call.message.message_id);
     return;

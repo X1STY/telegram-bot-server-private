@@ -1,4 +1,4 @@
-import { Palaces, ProblemType, Status } from '@prisma/client';
+import { Palaces, ProblemType, Role, Status } from '@prisma/client';
 
 export const pathToImageFolder: string = './static/images/';
 
@@ -57,4 +57,15 @@ export const ProblemTypeConverter = {
   [ProblemType.HEATING]: 'Отопление / Кондиционирование',
   [ProblemType.OTHER]: 'Другое - мелкий и средний ремонт',
   [ProblemType.WATERSUPPLY]: 'Водоснабжение / Канализация'
+};
+
+export const RoleConvertor = {
+  [Role.ADMIN]: 'Администратор',
+  [Role.EMPLOYEE]: 'Сотрудник ОЭЗ',
+  [Role.EVENTRENTER]: 'Арендатор для мероприятий',
+  [Role.GUEST]: 'Гость',
+  [Role.NONRESIDENTRENTER]: 'Арендатор-нерезидент',
+  [Role.RESIDENT]: 'Резидент',
+  [Role.SUPPORT]: 'Агент поддержки',
+  [Role.UNREGISTERED]: 'Незарегестрирован'
 };

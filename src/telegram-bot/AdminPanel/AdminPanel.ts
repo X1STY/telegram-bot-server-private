@@ -1,52 +1,56 @@
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
-import { AdminPanelMenu, MainMenu } from '../markups';
 import { findUserById } from '../bot.service';
-import { ReplayQuestionCallback } from '../ReplyQuestionCallback';
+import { AdminPanelMenu } from '../markups';
 
-export const AdminPanel = async (
+export const PreAdmin = async (
   bot: TelegramBot,
   msg: TelegramBot.Message,
   prisma: PrismaClient
 ) => {
-  const user = await findUserById(msg.from.id, prisma);
-  //await registerNewUser(msg, prisma);
-  if (msg.text === '/admin') {
-    if (user && user.role !== 'ADMIN') {
-      await registerUserAsAdmin(bot, msg, prisma);
-    } else {
-      await bot.sendMessage(msg.from.id, 'Вы авторизированы как администратор', {
-        reply_markup: AdminPanelMenu()
-      });
-    }
-  }
-};
-
-const registerUserAsAdmin = async (
-  bot: TelegramBot,
-  msg: TelegramBot.Message,
-  prisma: PrismaClient
-) => {
-  await bot.sendMessage(msg.from.id, 'Введите пароль доступа в админ панель');
-  const responseMsg = await ReplayQuestionCallback(bot, msg);
-
-  if (responseMsg.text !== process.env.ADMIN_PASSWORD) {
-    await bot.sendMessage(msg.from.id, 'Неверный пароль!', {
-      reply_markup: MainMenu()
-    });
-    return;
-  }
-
-  await bot.sendMessage(msg.from.id, 'Успешная авторизация!', {
-    reply_markup: AdminPanelMenu()
-  });
-
-  await prisma.user.update({
-    data: {
-      role: 'ADMIN'
-    },
+  const user = await prisma.user.findFirst({
     where: {
       telegramId: msg.from.id
     }
   });
+  if (user.role !== 'ADMIN') {
+    return;
+  }
+  const call: TelegramBot.CallbackQuery = {
+    id: ' ',
+    chat_instance: msg.chat.id.toString(),
+    data: 'admin',
+    from: msg.from
+  };
+  AdminPage(bot, call, prisma);
+};
+
+export const AdminPage = async (
+  bot: TelegramBot,
+  call: TelegramBot.CallbackQuery,
+  prisma: PrismaClient
+) => {
+  const user = await findUserById(call.from.id, prisma);
+
+  if (call.data !== 'admin') {
+    return;
+  }
+  if (user.role !== 'ADMIN') {
+    await bot.deleteMessage(call.message.chat.id, call.message.message_id);
+    return;
+  }
+  const chatId = call.from.id || call.chat_instance;
+  if (call.id !== ' ') {
+    await bot.answerCallbackQuery(call.id);
+    await bot.deleteMessage(chatId, call.message.message_id);
+  }
+  await bot.sendMessage(
+    chatId,
+    'Меню администратора. Вы можете сделать рассылку информации, редактировать агентов поддержки и изменять содержание постов',
+    {
+      reply_markup: AdminPanelMenu()
+    }
+  );
+
+  return;
 };
