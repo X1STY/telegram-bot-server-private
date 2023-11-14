@@ -41,7 +41,7 @@ export const RentForNotResidentSendRequirementsFunc = async (
     });
     return;
   }
-  if (userData.rented_area_requests_application) {
+  if (userData.rented_area_requests_application == null) {
     try {
       const { areaType, areaPremises, areaRentalStart } = await RequestedRentAreaQuestionnare(
         bot,

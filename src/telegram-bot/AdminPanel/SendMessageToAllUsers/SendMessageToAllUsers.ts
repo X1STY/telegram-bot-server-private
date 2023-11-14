@@ -1,9 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { AdminPanelMenu } from '@/telegram-bot/markups';
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
 import { findUserById } from '@/telegram-bot/bot.service';
 import { sendToUser } from '@/telegram-bot/messages';
+
+const filters: { [id: number]: Array<Role> } = {};
 
 export const SendMessageToAllUsers = async (
   bot: TelegramBot,
@@ -26,8 +28,8 @@ export const SendMessageToAllUsers = async (
   const responseMsg = await ReplayQuestionCallback(bot, call);
   const users = await prisma.user.findMany({
     where: {
-      NOT: {
-        telegramId: call.from.id
+      role: {
+        in: filters[call.from.id]
       }
     }
   });

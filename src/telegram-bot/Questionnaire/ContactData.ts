@@ -20,13 +20,13 @@ export const ContactDataQuestionnare = async (
     message: 'Укажите ваш номер телефона',
     canPreviousMessageBeDeleted: false
   });
-  const phone = await ReplayQuestionCallback(bot, call);
+  const phone = await ReplayQuestionCallback(bot, call, 'phone');
   await sendToUser({
     bot,
     call,
     message: 'Укажите вашу электронную почту',
     canPreviousMessageBeDeleted: false
   });
-  const email = await ReplayQuestionCallback(bot, call);
+  const email = await ReplayQuestionCallback(bot, call, 'email');
   return { name: name.text, phone: phone.text, email: email.text };
 };

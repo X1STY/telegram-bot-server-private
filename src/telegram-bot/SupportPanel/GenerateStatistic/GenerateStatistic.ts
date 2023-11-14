@@ -205,7 +205,7 @@ const fromDatabaseToExcel = async (prisma: PrismaClient) => {
       application.area_type,
       application.area_premises,
       application.area_rental_start,
-      PalaceConvertor[application.chosen_palace],
+      PalaceConvertor[application.chosen_palace] ?? 'Не выбран',
       application.user_telegramId,
       StatusConvertor[application.status],
       application.area_dispatch_date.toLocaleString(),

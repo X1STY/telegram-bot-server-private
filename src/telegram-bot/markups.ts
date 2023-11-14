@@ -368,7 +368,7 @@ export const ChangeUserDataMenu = (role: Role): TelegramBot.InlineKeyboardMarkup
   };
   const buttons: TelegramBot.InlineKeyboardButton[][] = [[b1], [b2], [b3]];
 
-  if (role !== 'EMPLOYEE' && role !== 'GUEST' && role !== 'EVENTRENTER') {
+  if (role === 'NONRESIDENTRENTER' || role === 'RESIDENT') {
     buttons.push([b4], [b5]);
   }
   const kb: TelegramBot.InlineKeyboardMarkup = {
@@ -739,6 +739,78 @@ export const ApplicationCorusel = (
   };
   const kb: TelegramBot.InlineKeyboardMarkup = {
     inline_keyboard: chose === true ? [[b4, b5]] : [[b1, b3], [b2], [back]]
+  };
+  return kb;
+};
+
+export const ManageSupportMenu = (): TelegramBot.InlineKeyboardMarkup => {
+  const b1: TelegramBot.InlineKeyboardButton = {
+    text: 'Добавить',
+    callback_data: 'add_support'
+  };
+  const b2: TelegramBot.InlineKeyboardButton = {
+    text: 'Выбор существующего',
+    callback_data: 'choose_support'
+  };
+  const b3: TelegramBot.InlineKeyboardButton = {
+    text: 'Назад',
+    callback_data: 'admin'
+  };
+
+  const kb: TelegramBot.InlineKeyboardMarkup = {
+    inline_keyboard: [[b1, b2], [b3]]
+  };
+  return kb;
+};
+
+export const BackToAdminPanel = (): TelegramBot.InlineKeyboardMarkup => {
+  const b1: TelegramBot.InlineKeyboardButton = {
+    text: 'В админ панель',
+    callback_data: 'admin'
+  };
+
+  const kb: TelegramBot.InlineKeyboardMarkup = {
+    inline_keyboard: [[b1]]
+  };
+  return kb;
+};
+
+export const ChosenSupportMenu = (): TelegramBot.InlineKeyboardMarkup => {
+  const b1: TelegramBot.InlineKeyboardButton = {
+    text: 'Редактирование контактной информации',
+    callback_data: 'edit_support_contact'
+  };
+  const b2: TelegramBot.InlineKeyboardButton = {
+    text: 'Просмотр статистики заявок',
+    callback_data: 'check_support_stat'
+  };
+  const b3: TelegramBot.InlineKeyboardButton = {
+    text: 'Удаление',
+    callback_data: 'delete_support'
+  };
+
+  const kb: TelegramBot.InlineKeyboardMarkup = {
+    inline_keyboard: [[b1], [b2], [b3]]
+  };
+  return kb;
+};
+
+export const ChangeSupportMenu = (): TelegramBot.InlineKeyboardMarkup => {
+  const b1: TelegramBot.InlineKeyboardButton = {
+    text: 'Изменить имя',
+    callback_data: 'change_support-name'
+  };
+  const b2: TelegramBot.InlineKeyboardButton = {
+    text: 'Изменить почту',
+    callback_data: 'change_support-email'
+  };
+  const b3: TelegramBot.InlineKeyboardButton = {
+    text: 'Изменить номер телефона',
+    callback_data: 'change_support-phone'
+  };
+
+  const kb: TelegramBot.InlineKeyboardMarkup = {
+    inline_keyboard: [[b1], [b2], [b3]]
   };
   return kb;
 };

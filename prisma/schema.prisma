@@ -12,7 +12,7 @@ datasource db {
 
 model ContactData {
   name String
-  email String
+  email String @unique
   phone String
   organization String?
   title String?

@@ -1,6 +1,6 @@
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
 import { findUserById } from '@/telegram-bot/bot.service';
-import { BackToRegisteredMenu, ChangeUserDataMenu } from '@/telegram-bot/markups';
+import { BackToAdminPanel, BackToRegisteredMenu, ChangeUserDataMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
@@ -11,6 +11,7 @@ export const ChangeContacts = async (
   prisma: PrismaClient
 ) => {
   if (call.data !== 'change_my_contacts') {
+    if (call.data.startsWith('change_support')) return;
     handleChangeData(bot, call, prisma);
     return;
   }
@@ -25,12 +26,13 @@ export const ChangeContacts = async (
   });
 };
 
-const handleChangeData = async (
+export const handleChangeData = async (
   bot: TelegramBot,
   call: TelegramBot.CallbackQuery,
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  userId?: number
 ) => {
-  if (!call.data.startsWith('change_my-')) {
+  if (!call.data.startsWith('change_my-') && !call.data.startsWith('change_support-')) {
     return;
   }
   bot.answerCallbackQuery(call.id);
@@ -41,13 +43,17 @@ const handleChangeData = async (
     message: 'Введите новые данные.'
   });
   try {
-    const response = (await ReplayQuestionCallback(bot, call)).text;
+    let type: 'phone' | 'email' | null = null;
+    if (thingToChange === 'phone') type = 'phone';
+    if (thingToChange === 'email') type = 'email';
+
+    const response = (await ReplayQuestionCallback(bot, call, type)).text;
     await prisma.contactData.update({
       data: {
         [thingToChange]: response
       },
       where: {
-        user_telegramId: call.from.id
+        user_telegramId: userId ?? call.from.id
       }
     });
   } catch (error) {
@@ -62,7 +68,7 @@ const handleChangeData = async (
     bot,
     call,
     message: 'Успешно измененно!',
-    keyboard: BackToRegisteredMenu(),
+    keyboard: call.data.includes('support') ? BackToAdminPanel() : BackToRegisteredMenu(),
     canPreviousMessageBeDeleted: false
   });
 };

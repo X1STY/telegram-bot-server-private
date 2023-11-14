@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { findUserById } from '../bot.service';
 import { AdminPanelMenu } from '../markups';
+import { ManageSupport } from './ManageSupport/ManageSupport';
+import { ChooseSupport } from './ChooseSupport/ChooseSupport';
 
 export const PreAdmin = async (
   bot: TelegramBot,
@@ -33,6 +35,8 @@ export const AdminPage = async (
   const user = await findUserById(call.from.id, prisma);
 
   if (call.data !== 'admin') {
+    ManageSupport(bot, call, prisma);
+    ChooseSupport(bot, call, prisma);
     return;
   }
   if (user.role !== 'ADMIN') {
