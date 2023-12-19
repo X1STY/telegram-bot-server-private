@@ -1,5 +1,5 @@
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { findUserById } from '@/telegram-bot/bot.service';
+import { findUserById, logger } from '@/telegram-bot/bot.service';
 import { BackToAdminPanel } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
@@ -86,7 +86,7 @@ export const AddSupport = async (
     });
   } catch (error) {
     if (error.message === 'command') return;
-    else console.log(error.message);
+    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
   }
 
   return;

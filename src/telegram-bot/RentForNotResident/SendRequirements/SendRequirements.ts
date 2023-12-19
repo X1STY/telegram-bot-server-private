@@ -1,6 +1,8 @@
 import { ContactDataWithTitleQuestionnare } from '@/telegram-bot/Questionnaire/ContactDataWithTitle';
 import { RequestedRentAreaQuestionnare } from '@/telegram-bot/Questionnaire/RequestedRentArea';
-import { BackToRegisteredMenu, MainMenu } from '@/telegram-bot/markups';
+import { sendNotification } from '@/telegram-bot/Questionnaire/uitils/SendNotification';
+import { botMessages, logger } from '@/telegram-bot/bot.service';
+import { BackToRegisteredMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { Palaces, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
@@ -32,37 +34,36 @@ export const RentForNotResidentSendRequirementsFunc = async (
     }
   });
   bot.answerCallbackQuery(call.id);
-  if (userData.role !== 'UNREGISTERED') {
-    await sendToUser({
+  // if (userData.role !== 'UNREGISTERED') {
+  //   await sendToUser({
+  //     bot,
+  //     call,
+  //     message: botMessages['RegisteredError'].message,
+  //     keyboard: MainMenu()
+  //   });
+  //   return;
+  // }
+  try {
+    const { areaType, areaPremises, areaRentalStart } = await RequestedRentAreaQuestionnare(
       bot,
-      call,
-      message: 'Вы уже зарегестрированны! Попробуйте воспользоваться меню при помощи /registered',
-      keyboard: MainMenu()
+      call
+    );
+    await prisma.rentedAreaRequestsApplication.create({
+      data: {
+        area_premises: areaPremises,
+        area_type: areaType,
+        area_rental_start: areaRentalStart,
+        status: 'Waiting',
+        user_telegramId: call.from.id,
+        chosen_palace: chosenPalace,
+        area_dispatch_date: new Date(),
+        sended_as: 'OTHER'
+      }
     });
-    return;
-  }
-  if (userData.rented_area_requests_application == null) {
-    try {
-      const { areaType, areaPremises, areaRentalStart } = await RequestedRentAreaQuestionnare(
-        bot,
-        call
-      );
-      await prisma.rentedAreaRequestsApplication.create({
-        data: {
-          area_premises: areaPremises,
-          area_type: areaType,
-          area_rental_start: areaRentalStart,
-          status: 'Waiting',
-          user_telegramId: call.from.id,
-          chosen_palace: chosenPalace,
-          area_dispatch_date: new Date()
-        }
-      });
-    } catch (error) {
-      if (error.message === 'command') {
-        return;
-      } else console.log(error.message);
-    }
+  } catch (error) {
+    if (error.message === 'command') {
+      return;
+    } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
   }
 
   if (!userData.contact_data) {
@@ -84,24 +85,24 @@ export const RentForNotResidentSendRequirementsFunc = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else console.log(error.message);
+      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
     }
   }
-
-  await prisma.user.update({
-    data: {
-      role: 'NONRESIDENTRENTER'
-    },
-    where: {
-      telegramId: call.from.id
-    }
-  });
+  if (userData.role === 'UNREGISTERED')
+    await prisma.user.update({
+      data: {
+        role: 'NONRESIDENTRENTER'
+      },
+      where: {
+        telegramId: call.from.id
+      }
+    });
   await sendToUser({
     bot,
     call,
-    message:
-      'Ваша заявка направлена к ответственным лицам! Можете воспользоваться /registered для доступа к меню зарегестрированных пользователей',
+    message: botMessages['ApplicationSent'].message,
     canPreviousMessageBeDeleted: false,
     keyboard: BackToRegisteredMenu()
   });
+  await sendNotification(bot, prisma, { from: 'BecomeANonResidentRenter' });
 };

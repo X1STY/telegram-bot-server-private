@@ -1,5 +1,6 @@
 import { pathToImageFolder } from '@/constants';
-import { CentersPlaceMenu } from '@/telegram-bot/markups';
+import { botMessages } from '@/telegram-bot/bot.service';
+import { BackToSouthMenu, CentersPlaceMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import TelegramBot from 'node-telegram-bot-api';
 
@@ -11,7 +12,7 @@ export const INVENTUMPage = async (bot: TelegramBot, call: TelegramBot.CallbackQ
     bot,
     call,
     photo: pathToImageFolder + 'INVENTUM.png',
-    message: 'Инфа про INVENTUM!',
+    message: botMessages['CITMessage'].message,
     keyboard: CentersPlaceMenu('CIT')
   });
 
@@ -27,7 +28,7 @@ export const TECHNUMPage = async (bot: TelegramBot, call: TelegramBot.CallbackQu
     bot,
     call,
     photo: pathToImageFolder + 'TECHNUM.png',
-    message: 'Инфа про TECHNNUM!',
+    message: botMessages['ICMessage'].message,
     keyboard: CentersPlaceMenu('IC')
   });
 
@@ -42,7 +43,7 @@ export const VITUMPage = async (bot: TelegramBot, call: TelegramBot.CallbackQuer
     bot,
     call,
     photo: pathToImageFolder + 'VITUM.png',
-    message: 'Инфа про VITUM!',
+    message: botMessages['NVCMessage'].message,
     keyboard: CentersPlaceMenu('NVC')
   });
 
@@ -57,7 +58,7 @@ export const FUTURUMPage = async (bot: TelegramBot, call: TelegramBot.CallbackQu
     bot,
     call,
     photo: pathToImageFolder + 'EC.png',
-    message: 'Инфа про FUTURUM!',
+    message: botMessages['ECMessage'].message,
     keyboard: CentersPlaceMenu('EC')
   });
 
@@ -72,8 +73,8 @@ export const EKCPOCENTERPage = async (bot: TelegramBot, call: TelegramBot.Callba
     bot,
     call,
     photo: pathToImageFolder + 'EXPOCENTER.png',
-    message: 'Инфа про Экспоцентр!',
-    keyboard: CentersPlaceMenu('EXPOCENTER')
+    message: botMessages['EXPOCENTERMessage'].message,
+    keyboard: BackToSouthMenu()
   });
 
   await bot.answerCallbackQuery(call.id);

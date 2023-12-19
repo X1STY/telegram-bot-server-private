@@ -17,13 +17,13 @@ model ContactData {
   organization String?
   title String?
 
-  user_telegramId Int @id
+  user_telegramId BigInt @id
   user User @relation(fields: [user_telegramId], references: [telegramId])
 
 }
 
 model User {
-  telegramId Int @id
+  telegramId BigInt @id @db.BigInt
   username String
   full_name String
   role Role @default(UNREGISTERED)
@@ -31,11 +31,14 @@ model User {
   contact_data ContactData?
   problem_application ProblemApplication[]
   area_expectations_application AreaExpectationsApplication[]
-  rented_area_requests_application RentedAreaRequestsApplication?
+  rented_area_requests_application RentedAreaRequestsApplication[]
   key_project_parameters_application KeyProjectParametersApplication?
   building_plans_application BuildingPlansApplication?
   booking_hall_application BookingHallApplication[]
   innovation_proposal_application InnovationProposalApplication[]
+  questions QuestionsToSupport[] @relation("sender")
+  
+  support_questions QuestionsToSupport[] 
 }
 
 model Halls {
@@ -56,9 +59,9 @@ model ProblemApplication {
 
   problem_dispatch_date DateTime
   problem_approval_date DateTime?
-  problem_support_id Int?
+  problem_support_id BigInt?
 
-  user_telegramId Int 
+  user_telegramId BigInt 
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
@@ -71,12 +74,12 @@ model AreaExpectationsApplication {
 
   event_dispatch_date DateTime
   event_approval_date DateTime?
-  event_support_id Int?
+  event_support_id BigInt?
 
   chosen_hall_id Int? 
   hall Halls? @relation(fields: [chosen_hall_id], references: [id])
 
-  user_telegramId Int 
+  user_telegramId BigInt 
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
@@ -87,13 +90,14 @@ model RentedAreaRequestsApplication {
   area_rental_start String
   status Status
   chosen_palace Palaces?
+  sended_as RentSender
 
   area_dispatch_date DateTime
   area_approval_date DateTime?
-  area_support_id Int?
+  area_support_id BigInt?
 
 
-  user_telegramId Int @unique
+  user_telegramId BigInt
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
@@ -106,9 +110,9 @@ model KeyProjectParametersApplication {
 
   project_dispatch_date DateTime
   project_approval_date DateTime?
-  project_support_id Int?
+  project_support_id BigInt?
 
-  user_telegramId Int @unique
+  user_telegramId BigInt @unique
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
@@ -120,9 +124,9 @@ model BuildingPlansApplication {
 
   building_dispatch_date DateTime
   building_approval_date DateTime?
-  building_support_id Int?
+  building_support_id BigInt?
 
-  user_telegramId Int @unique
+  user_telegramId BigInt @unique
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
@@ -136,12 +140,12 @@ model BookingHallApplication {
 
   hall_dispatch_date DateTime
   hall_approval_date DateTime?
-  hall_support_id Int?
+  hall_support_id BigInt?
 
   chosen_hall_id Int
   hall Halls @relation(fields: [chosen_hall_id], references: [id])
 
-  user_telegramId Int 
+  user_telegramId BigInt 
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
@@ -156,10 +160,36 @@ model InnovationProposalApplication {
 
   innovation_dispatch_date DateTime
   innovation_approval_date DateTime?
-  innovation_support_id Int?
+  innovation_support_id BigInt?
 
-  user_telegramId Int 
+  user_telegramId BigInt 
   user User @relation(fields: [user_telegramId], references: [telegramId])
+}
+
+model QuestionsToSupport {
+  message_id Int @id
+  sender_id BigInt
+  question_text String
+  Status Status
+  
+  answer_text String?
+  support_id BigInt?
+
+  question_dispatch_date DateTime
+  question_approval_date DateTime?
+
+  support User? @relation(fields: [support_id], references: [telegramId])
+  user User @relation(fields: [sender_id], references: [telegramId], name: "sender")
+  messagesInSupportChats QuestionsChatIds[]
+}
+
+model QuestionsChatIds {
+   message_id Int 
+   message_support_chat_id BigInt 
+   support_id BigInt 
+
+  @@id([message_id, message_support_chat_id,support_id])
+  question QuestionsToSupport @relation(fields: [message_id], references: [message_id])
 }
 
 enum Role {
@@ -194,4 +224,10 @@ enum Palaces {
   NVC
   EC
   EXPOCENTER
+  ADMINISTRATIVE
+}
+
+enum RentSender {
+  RESIDENT
+  OTHER
 }

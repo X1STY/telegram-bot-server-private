@@ -1,5 +1,5 @@
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { findUserById } from '@/telegram-bot/bot.service';
+import { findUserById, logger } from '@/telegram-bot/bot.service';
 import { ChosenSupportMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
@@ -7,6 +7,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { ChangeSupportContacts } from './ChangeSupportContactData/ChangeSupportContactData';
 import { DeleteSupport } from './DeleteSupport/DeleteSupport';
 import { CheckSupportStat } from './CheckSupportStat/CheckSupportStat';
+import { deleteMessagesFromArray } from '@/telegram-bot/Questionnaire/uitils/DeleteMessages';
 
 export const state: { [id: number]: number } = {};
 
@@ -16,9 +17,15 @@ export const ChooseSupport = async (
   prisma: PrismaClient
 ) => {
   if (call.data !== 'choose_support') {
-    ChangeSupportContacts(bot, call, prisma);
-    DeleteSupport(bot, call, prisma, state[call.from.id]);
-    CheckSupportStat(bot, call, prisma, state[call.from.id]);
+    try {
+      await ChangeSupportContacts(bot, call, prisma);
+      await DeleteSupport(bot, call, prisma, state[call.from.id]);
+      await CheckSupportStat(bot, call, prisma, state[call.from.id]);
+    } catch (error) {
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      return;
+    }
+
     return;
   }
   const user = await findUserById(call.from.id, prisma);
@@ -46,6 +53,7 @@ export const ChooseSupport = async (
     });
     return;
   }
+  const arr: Array<TelegramBot.Message> = [];
 
   let allEmployees = '';
   supports.forEach((user, index) => {
@@ -54,7 +62,7 @@ export const ChooseSupport = async (
     allEmployees += user.contact_data.email + '\n';
   });
 
-  await sendToUser({
+  const question = await sendToUser({
     bot,
     call,
     message:
@@ -62,24 +70,24 @@ export const ChooseSupport = async (
   });
 
   try {
-    const index = (await ReplayQuestionCallback(bot, call, 'number', [0, supports.length - 1]))
-      .text;
+    const index = await ReplayQuestionCallback(bot, call, 'number', [0, supports.length - 1]);
     const newEmployeeId = await prisma.contactData.findFirst({
       where: {
         name: {
-          equals: supports[Number(index)].contact_data.name
+          equals: supports[Number(index.text)].contact_data.name
         },
         email: {
-          equals: supports[Number(index)].contact_data.email
+          equals: supports[Number(index.text)].contact_data.email
         }
       }
     });
-    state[call.from.id] = newEmployeeId.user_telegramId;
+    state[call.from.id] = Number(newEmployeeId.user_telegramId);
+    arr.push(question, index);
   } catch (error) {
     if (error.message === 'command') {
       return;
     }
-    console.log(error.message);
+    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
   }
 
   const id = state[call.from.id];
@@ -88,7 +96,7 @@ export const ChooseSupport = async (
       user_telegramId: id
     }
   });
-  const message = `Агент поддержки\nИмя: ${currentSupport.name}\n Почта: ${currentSupport.email}\nНомер телефона: ${currentSupport.phone}\n\n`;
+  const message = `Агент поддержки\nИмя: ${currentSupport.name}\nПочта: ${currentSupport.email}\nНомер телефона: ${currentSupport.phone}\n\n`;
 
   await sendToUser({
     bot,
@@ -97,4 +105,5 @@ export const ChooseSupport = async (
     canPreviousMessageBeDeleted: false,
     keyboard: ChosenSupportMenu()
   });
+  await deleteMessagesFromArray(bot, call, arr);
 };

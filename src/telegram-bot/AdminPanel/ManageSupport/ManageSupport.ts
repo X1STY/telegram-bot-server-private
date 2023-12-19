@@ -1,4 +1,4 @@
-import { findUserById } from '@/telegram-bot/bot.service';
+import { findUserById, logger } from '@/telegram-bot/bot.service';
 import { ManageSupportMenu } from '@/telegram-bot/markups';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
@@ -10,7 +10,12 @@ export const ManageSupport = async (
   prisma: PrismaClient
 ) => {
   if (call.data !== 'manage_support_agent') {
-    AddSupport(bot, call, prisma);
+    try {
+      await AddSupport(bot, call, prisma);
+    } catch (error) {
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      return;
+    }
     return;
   }
   const user = await findUserById(call.from.id, prisma);

@@ -38,14 +38,10 @@ export const InfoPageMenu = (): TelegramBot.InlineKeyboardMarkup => {
     callback_data: 'general_info'
   };
   const b2: TelegramBot.InlineKeyboardButton = {
-    text: 'Нормативные документы',
-    callback_data: 'regulatory_documents'
-  };
-  const b3: TelegramBot.InlineKeyboardButton = {
     text: 'Контактные данные УК',
     callback_data: 'uk_contact_data'
   };
-  const b4: TelegramBot.InlineKeyboardButton = {
+  const b3: TelegramBot.InlineKeyboardButton = {
     text: 'Инфраструктура',
     callback_data: 'infrostructure'
   };
@@ -54,7 +50,7 @@ export const InfoPageMenu = (): TelegramBot.InlineKeyboardMarkup => {
     callback_data: 'to_main_menu'
   };
   const kb: TelegramBot.InlineKeyboardMarkup = {
-    inline_keyboard: [[b1, b2], [b3, b4], [back], [toMainMenuButton]]
+    inline_keyboard: [[b1], [b2, b3], [back], [toMainMenuButton]]
   };
   return kb;
 };
@@ -64,7 +60,10 @@ export const GeneralInfoMenu = (): TelegramBot.InlineKeyboardMarkup => {
     text: 'Сервисы и поддержка',
     callback_data: 'services_and_support'
   };
-  const b2: TelegramBot.InlineKeyboardButton = { text: 'Льготы', callback_data: 'exemptions' };
+  const b2: TelegramBot.InlineKeyboardButton = {
+    text: 'Преференции и Льготы',
+    callback_data: 'exemptions'
+  };
   const b3: TelegramBot.InlineKeyboardButton = {
     text: 'Путь получения статуса',
     callback_data: 'way_to_obtain_status'
@@ -74,7 +73,7 @@ export const GeneralInfoMenu = (): TelegramBot.InlineKeyboardMarkup => {
     callback_data: 'learn_about_OEZ'
   };
   const kb: TelegramBot.InlineKeyboardMarkup = {
-    inline_keyboard: [[b1, b2, b3], [back], [toMainMenuButton]]
+    inline_keyboard: [[b1], [b2], [b3], [back], [toMainMenuButton]]
   };
   return kb;
 };
@@ -135,8 +134,9 @@ export const UKContactDataMenu = (from?: string): TelegramBot.InlineKeyboardMark
   return { inline_keyboard: [[b1, b2, b3], [back], [toMainMenuButton]] };
 };
 
-const web: TelegramBot.WebAppInfo = { url: 'https://yandex.ru/maps/-/CDaPzPm4' };
 export const ICCenterMenu = (): TelegramBot.InlineKeyboardMarkup => {
+  const web: TelegramBot.WebAppInfo = { url: 'https://yandex.ru/maps/-/CDqI4BkR' };
+
   const b1: TelegramBot.InlineKeyboardButton = {
     text: 'Яндекс карты',
     web_app: web
@@ -148,6 +148,8 @@ export const ICCenterMenu = (): TelegramBot.InlineKeyboardMarkup => {
   return { inline_keyboard: [[b1], [back], [toMainMenuButton]] };
 };
 export const CITCenterMenu = (): TelegramBot.InlineKeyboardMarkup => {
+  const web: TelegramBot.WebAppInfo = { url: 'https://yandex.ru/maps/-/CDqI4Apf' };
+
   const b1: TelegramBot.InlineKeyboardButton = {
     text: 'Яндекс карты',
     web_app: web
@@ -159,6 +161,8 @@ export const CITCenterMenu = (): TelegramBot.InlineKeyboardMarkup => {
   return { inline_keyboard: [[b1], [back], [toMainMenuButton]] };
 };
 export const NVCCenterMenu = (): TelegramBot.InlineKeyboardMarkup => {
+  const web: TelegramBot.WebAppInfo = { url: 'https://yandex.ru/maps/-/CDaPzPm4' };
+
   const b1: TelegramBot.InlineKeyboardButton = {
     text: 'Яндекс карты',
     web_app: web
@@ -241,16 +245,20 @@ export const SouthPalaceMenu = (): TelegramBot.InlineKeyboardMarkup => {
     callback_data: 'vitum'
   };
   const b4: TelegramBot.InlineKeyboardButton = {
-    text: 'Инжиниринговый центр',
-    callback_data: 'futurum'
+    text: 'Земельные участки',
+    callback_data: 'land_plots'
   };
-  const b5: TelegramBot.InlineKeyboardButton = { text: 'Экспоцентр', callback_data: 'expocenter' };
+  const b5: TelegramBot.InlineKeyboardButton = {
+    text: 'Планы строительства',
+    callback_data: 'plans_for_future_buildings'
+  };
+
   const back: TelegramBot.InlineKeyboardButton = {
     text: 'Назад',
     callback_data: 'infrostructure'
   };
   const kb: TelegramBot.InlineKeyboardMarkup = {
-    inline_keyboard: [[b1, b2], [b3, b4], [b5], [back, toMainMenuButton]]
+    inline_keyboard: [[b1], [b2], [b3], [b4], [b5], [back, toMainMenuButton]]
   };
   return kb;
 };
@@ -276,6 +284,14 @@ export const CentersPlaceMenu = (url: string): TelegramBot.InlineKeyboardMarkup 
     inline_keyboard: [[b1], [back], [toMainMenuButton]]
   };
   return kb;
+};
+
+export const BackToSouthMenu = (): TelegramBot.InlineKeyboardMarkup => {
+  const back: TelegramBot.InlineKeyboardButton = {
+    text: 'Назад',
+    callback_data: 'south_palace'
+  };
+  return { inline_keyboard: [[back], [toMainMenuButton]] };
 };
 
 export const AccomodateMenu = (url: string): TelegramBot.InlineKeyboardMarkup => {
@@ -307,7 +323,7 @@ export const RegisteredUserMenu = (userRole: Role): TelegramBot.InlineKeyboardMa
     callback_data: 'send_problem_report'
   };
   const b4: TelegramBot.InlineKeyboardButton = {
-    text: 'Рационализаторское предложение',
+    text: 'Озвучить идею / предложение',
     callback_data: 'proposal_innovation'
   };
   const b5: TelegramBot.InlineKeyboardButton = {
@@ -323,15 +339,19 @@ export const RegisteredUserMenu = (userRole: Role): TelegramBot.InlineKeyboardMa
     text: 'Новая аренда зала',
     callback_data: 'rent_for_event'
   };
+  const b9: TelegramBot.InlineKeyboardButton = {
+    text: '☎️Связь с поддержкой',
+    callback_data: 'apply_to_support'
+  };
 
   const buttons: TelegramBot.InlineKeyboardButton[][] = [[b1, b2], [b3], [b4], [b5]];
 
   if (userRole === 'RESIDENT') {
     buttons.push([b7]);
-  }
-  if (userRole === 'EVENTRENTER') {
+  } else {
     buttons.push([b8]);
   }
+  buttons.push([b9]);
   buttons.push([toMainMenuButton]);
 
   const kb: TelegramBot.InlineKeyboardMarkup = {
@@ -383,16 +403,20 @@ export const AdminPanelMenu = (): TelegramBot.InlineKeyboardMarkup => {
     callback_data: 'manage_support_agent'
   };
   const b2: TelegramBot.InlineKeyboardButton = {
-    text: 'Управление постами',
-    callback_data: 'manage_posts'
-  };
-  const b3: TelegramBot.InlineKeyboardButton = {
     text: 'Рассылка информации',
     callback_data: 'send_information'
   };
+  const b3: TelegramBot.InlineKeyboardButton = {
+    text: 'Управление постами',
+    callback_data: 'manage_messages'
+  };
+  const b4: TelegramBot.InlineKeyboardButton = {
+    text: 'Получить статистику',
+    callback_data: 'generate_statistic-ADMIN'
+  };
 
   const kb: TelegramBot.InlineKeyboardMarkup = {
-    inline_keyboard: [[b1], [b2], [b3]]
+    inline_keyboard: [[b1], [b2], [b3], [b4]]
   };
   return kb;
 };
@@ -702,7 +726,7 @@ export const ApplicationsTypeMenu = (): TelegramBot.InlineKeyboardMarkup => {
   return kb;
 };
 
-export const ApplicationCorusel = (
+export const ApplicationCoruselMenu = (
   page: number,
   pageCount: number,
   callback_data: string,
@@ -807,6 +831,71 @@ export const ChangeSupportMenu = (): TelegramBot.InlineKeyboardMarkup => {
   const b3: TelegramBot.InlineKeyboardButton = {
     text: 'Изменить номер телефона',
     callback_data: 'change_support-phone'
+  };
+
+  const kb: TelegramBot.InlineKeyboardMarkup = {
+    inline_keyboard: [[b1], [b2], [b3]]
+  };
+  return kb;
+};
+
+export const SendInfoFiltersMenu = (filters: Array<Role>): TelegramBot.InlineKeyboardMarkup => {
+  const b1: TelegramBot.InlineKeyboardButton = {
+    text: 'Резидент',
+    callback_data: 'send_information_add_filter-RESIDENT'
+  };
+  const b2: TelegramBot.InlineKeyboardButton = {
+    text: 'Нерезидент-арендатор',
+    callback_data: 'send_information_add_filter-NONRESIDENTRENTER'
+  };
+  const b3: TelegramBot.InlineKeyboardButton = {
+    text: 'Арендатор мероприятий',
+    callback_data: 'send_information_add_filter-EVENTRENTER'
+  };
+  const b6: TelegramBot.InlineKeyboardButton = {
+    text: 'Очистить фильтр',
+    callback_data: 'send_information_add_filter_clear'
+  };
+  const b4: TelegramBot.InlineKeyboardButton = {
+    text: 'Все пользователи',
+    callback_data: 'send_information_all_users'
+  };
+  const b5: TelegramBot.InlineKeyboardButton = {
+    text: 'Далее',
+    callback_data: 'send_information_message'
+  };
+  const buttons: TelegramBot.InlineKeyboardButton[][] = [];
+
+  if (!filters.includes(Role.NONRESIDENTRENTER)) {
+    buttons.push([b2]);
+  }
+  if (!filters.includes(Role.RESIDENT)) {
+    buttons.push([b1]);
+  }
+  if (!filters.includes(Role.EVENTRENTER)) {
+    buttons.push([b3]);
+  }
+
+  buttons.push([b4], [b6], [b5]);
+
+  const kb: TelegramBot.InlineKeyboardMarkup = {
+    inline_keyboard: buttons
+  };
+  return kb;
+};
+
+export const ManageMessagesMenu = (): TelegramBot.InlineKeyboardMarkup => {
+  const b1: TelegramBot.InlineKeyboardButton = {
+    text: 'Сводка существующих сообщений',
+    callback_data: 'see_all_messages'
+  };
+  const b2: TelegramBot.InlineKeyboardButton = {
+    text: 'Изменить сообщение',
+    callback_data: 'change_message'
+  };
+  const b3: TelegramBot.InlineKeyboardButton = {
+    text: 'Назад',
+    callback_data: 'admin'
   };
 
   const kb: TelegramBot.InlineKeyboardMarkup = {

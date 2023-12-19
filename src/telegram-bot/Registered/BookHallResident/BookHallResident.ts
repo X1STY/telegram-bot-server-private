@@ -1,4 +1,6 @@
 import { BookingHallQuestionnare } from '@/telegram-bot/Questionnaire/BookingHall';
+import { sendNotification } from '@/telegram-bot/Questionnaire/uitils/SendNotification';
+import { botMessages, logger } from '@/telegram-bot/bot.service';
 import { BackToRegisteredMenu, BookHallResidentManualChooseMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { Halls, PrismaClient } from '@prisma/client';
@@ -11,7 +13,7 @@ export const BookHallResident = async (
 ) => {
   if (!call.data.startsWith('book')) return;
   const Halls = await prisma.halls.findMany();
-  RentCorusel(bot, call, prisma, Halls);
+  await RentCorusel(bot, call, prisma, Halls);
 };
 
 const RentCorusel = async (
@@ -47,16 +49,18 @@ const RentCorusel = async (
         });
       } catch (error) {
         if (error.message === 'command') return;
-        else console.log(error.message);
+        logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
       }
 
       await sendToUser({
         bot,
         call,
-        message: 'Ваша завка отправлена!',
+        message: botMessages['ApplicationSent'].message,
         keyboard: BackToRegisteredMenu(),
         canPreviousMessageBeDeleted: false
       });
+      await sendNotification(bot, prisma, { from: 'Booking' });
+
       return;
     } else return;
   }

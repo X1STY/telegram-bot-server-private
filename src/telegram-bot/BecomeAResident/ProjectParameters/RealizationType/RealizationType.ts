@@ -1,6 +1,8 @@
 import { BuildingPlansQuestionnare } from '@/telegram-bot/Questionnaire/BuildingPlans';
 import { ContactDataWithTitleQuestionnare } from '@/telegram-bot/Questionnaire/ContactDataWithTitle';
 import { RequestedRentAreaQuestionnare } from '@/telegram-bot/Questionnaire/RequestedRentArea';
+import { sendNotification } from '@/telegram-bot/Questionnaire/uitils/SendNotification';
+import { botMessages, logger } from '@/telegram-bot/bot.service';
 import { BackToRegisteredMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { Palaces, PrismaClient } from '@prisma/client';
@@ -26,11 +28,7 @@ export const RealizationType = async (
       telegramId: call.from.id
     }
   });
-  if (
-    call.data.includes('realization_type_rent') &&
-    userData.rented_area_requests_application == null &&
-    userData.building_plans_application == null
-  ) {
+  if (call.data.includes('realization_type_rent') && userData.building_plans_application == null) {
     bot.answerCallbackQuery(call.id);
 
     try {
@@ -47,21 +45,18 @@ export const RealizationType = async (
           status: 'Waiting',
           user_telegramId: call.from.id,
           chosen_palace: chosenPalace,
-          area_dispatch_date: new Date()
+          area_dispatch_date: new Date(),
+          sended_as: 'RESIDENT'
         }
       });
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else console.log(error.message);
+      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
     }
   }
 
-  if (
-    call.data === 'realization_type_build' &&
-    userData.rented_area_requests_application == null &&
-    userData.building_plans_application == null
-  ) {
+  if (call.data === 'realization_type_build' && userData.building_plans_application == null) {
     bot.answerCallbackQuery(call.id);
     try {
       const { buildingPremises, buildingStart } = await BuildingPlansQuestionnare(bot, call);
@@ -77,7 +72,7 @@ export const RealizationType = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else console.log(error.message);
+      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
     }
   }
 
@@ -100,7 +95,7 @@ export const RealizationType = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else console.log(error.message);
+      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
     }
   }
 
@@ -116,9 +111,10 @@ export const RealizationType = async (
   await sendToUser({
     bot,
     call,
-    message:
-      'Ваша заявка направлена к ответственным лицам! Можете воспользоваться /registered для доступа к меню зарегестрированных пользователей',
+    message: botMessages['ApplicationSent'].message,
     canPreviousMessageBeDeleted: false,
     keyboard: BackToRegisteredMenu()
   });
+
+  await sendNotification(bot, prisma, { from: 'BecomeAResident' });
 };

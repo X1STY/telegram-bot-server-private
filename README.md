@@ -9,10 +9,6 @@ t.me/test_isgit_bot
 or
 @test_isgit_bot
 
-Admin panel is available on /admin
-
-password: admRoot2@1-sJmqlsQoPPs
-
 ## Installation
 
 ```bash

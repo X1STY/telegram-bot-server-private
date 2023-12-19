@@ -1,6 +1,6 @@
 import { BackToAdminPanel } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Status } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 
 export const CheckSupportStat = async (
@@ -18,50 +18,60 @@ export const CheckSupportStat = async (
     where: {
       role: 'SUPPORT',
       telegramId: id
+    },
+    include: {
+      contact_data: true
     }
   });
+  const supportData = `Пользователь @${user.username}\nИмя: ${user.contact_data.name}\nПочта: ${user.contact_data.email}\nНомер телефона: ${user.contact_data.phone}\n\n`;
   const amountProblem = await getAmount(
     prisma.problemApplication,
     'problem_support_id',
-    user.telegramId,
+    Number(user.telegramId),
     ['Accepted', 'Declined', 'Pending']
   );
   const amountInnovation = await getAmount(
     prisma.innovationProposalApplication,
     'innovation_support_id',
-    user.telegramId,
+    Number(user.telegramId),
     ['Accepted', 'Declined', 'Pending']
   );
   const amountEvent = await getAmount(
     prisma.areaExpectationsApplication,
     'event_support_id',
-    user.telegramId,
+    Number(user.telegramId),
     ['Accepted', 'Declined', 'Pending']
   );
   const amountArea = await getAmount(
     prisma.rentedAreaRequestsApplication,
     'area_support_id',
-    user.telegramId,
+    Number(user.telegramId),
     ['Accepted', 'Declined', 'Pending']
   );
   const amountKeyProj = await getAmount(
     prisma.keyProjectParametersApplication,
     'project_support_id',
-    user.telegramId,
+    Number(user.telegramId),
     ['Accepted', 'Declined', 'Pending']
   );
   const amountBook = await getAmount(
     prisma.bookingHallApplication,
     'hall_support_id',
-    user.telegramId,
+    Number(user.telegramId),
     ['Accepted', 'Declined', 'Pending']
   );
   const amountBuild = await getAmount(
     prisma.buildingPlansApplication,
     'building_support_id',
-    user.telegramId,
+    Number(user.telegramId),
     ['Accepted', 'Declined', 'Pending']
   );
+  const amountOfAnswers = await prisma.questionsToSupport.count({
+    where: {
+      Status: 'Accepted',
+      support_id: user.telegramId
+    }
+  });
   const message =
     formatStatString(amountProblem, 'Заявки о проблемах в ОЭЗ') +
     formatStatString(amountInnovation, 'Заявки о рационализаторских предложениях') +
@@ -72,12 +82,18 @@ export const CheckSupportStat = async (
     ) +
     formatStatString(amountKeyProj, 'Заявки о ключевых параметрах проекта') +
     formatStatString(amountBook, 'Заявки на аренду помещений от резидентов') +
-    formatStatString(amountBuild, 'Заявки на планы строительства при становлении резидентом');
+    formatStatString(amountBuild, 'Заявки на планы строительства при становлении резидентом') +
+    `Ответов на вопросы: ${amountOfAnswers}`;
 
-  await sendToUser({ bot, call, message, keyboard: BackToAdminPanel() });
+  await sendToUser({ bot, call, message: supportData + message, keyboard: BackToAdminPanel() });
 };
 
-const getAmount = async (prismaModel, userField, userTelegramId, statusValues) =>
+const getAmount = async (
+  prismaModel,
+  userField: string,
+  userTelegramId: number,
+  statusValues: Array<Status>
+) =>
   await prismaModel.groupBy({
     by: ['status'],
     _count: {

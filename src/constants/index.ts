@@ -8,40 +8,13 @@ export interface IUK {
   description: string;
 }
 
-export const arrayOfUK: IUK[] = [
-  {
-    id: Palaces.CIT,
-    photo: pathToImageFolder + 'INVENTUM.png',
-    description: 'Inventum'
-  },
-  {
-    id: Palaces.IC,
-    photo: pathToImageFolder + 'TECHNUM.png',
-    description: 'Technum'
-  },
-  {
-    id: Palaces.NVC,
-    photo: pathToImageFolder + 'VITUM.png',
-    description: 'Vitum'
-  },
-  {
-    id: Palaces.EC,
-    photo: pathToImageFolder + 'v1a.png',
-    description: 'futurum'
-  },
-  {
-    id: Palaces.EXPOCENTER,
-    photo: pathToImageFolder + 'v1b.png',
-    description: 'expocenter'
-  }
-];
-
 export const PalaceConvertor = {
   [Palaces.CIT]: 'Центр инновационных технологий',
   [Palaces.NVC]: 'Научно внедренческий центр',
   [Palaces.EC]: 'Инжиниринговый центр',
   [Palaces.IC]: 'Инженерный центр',
-  [Palaces.EXPOCENTER]: 'Экспоцентр'
+  [Palaces.EXPOCENTER]: 'Экспоцентр',
+  [Palaces.ADMINISTRATIVE]: 'Административный центр'
 };
 
 export const StatusConvertor = {

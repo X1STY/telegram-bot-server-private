@@ -11,6 +11,9 @@ import { SouthPalaceMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { Accomodation } from './Centers/Accomodation/Accomodation';
 import { PrismaClient } from '@prisma/client';
+import { botMessages } from '@/telegram-bot/bot.service';
+import { LandPlots } from './LandPlots/LandPlots';
+import { FutureBuildingPlans } from './FutureBuildingPlans/FutureBuildingPlans';
 
 export const SouthPalaceInfo = async (
   bot: TelegramBot,
@@ -24,12 +27,14 @@ export const SouthPalaceInfo = async (
     await FUTURUMPage(bot, call);
     await EKCPOCENTERPage(bot, call);
     await Accomodation(bot, call, prisma);
+    await LandPlots(bot, call);
+    await FutureBuildingPlans(bot, call);
     return;
   }
   await sendToUser({
     bot,
     call,
-    message: 'Инфа про южную площадку!',
+    message: botMessages['SouthPalaceMessage'].message,
     photo: pathToImageFolder + '13.png',
     keyboard: SouthPalaceMenu()
   });

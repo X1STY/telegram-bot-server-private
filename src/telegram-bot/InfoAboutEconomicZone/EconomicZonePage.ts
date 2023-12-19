@@ -4,9 +4,10 @@ import { InfoAboutInfrostructure } from './Infrostructure/InfrostructurePage';
 import { sendToUser } from '../messages';
 import { pathToImageFolder } from '@/constants';
 import { InfoPageMenu } from '../markups';
-import { RegulatoryDocuments } from './RegulatoryDocuments/RegulatoryDocuments';
+// import { RegulatoryDocuments } from './RegulatoryDocuments/RegulatoryDocuments';
 import { UKContactData } from './UKContactData/UKContactData';
 import { PrismaClient } from '@prisma/client';
+import { botMessages } from '../bot.service';
 
 export const InfoPageAboutZone = async (
   bot: TelegramBot,
@@ -16,7 +17,7 @@ export const InfoPageAboutZone = async (
   if (call.data !== 'learn_about_OEZ') {
     await GeneralInfoPage(bot, call);
     await InfoAboutInfrostructure(bot, call, prisma);
-    await RegulatoryDocuments(bot, call);
+    //await RegulatoryDocuments(bot, call);
     await UKContactData(bot, call);
     return;
   }
@@ -25,8 +26,7 @@ export const InfoPageAboutZone = async (
     bot,
     call,
     photo: pathToImageFolder + '11.png',
-    message:
-      'Особая экономическая зона (ОЭЗ) — это географическая область в стране, где действуют особые правила для привлечения инвестиций и облегчения бизнес-процессов. ОЭЗ обычно предоставляет налоговые льготы, упрощенные процедуры таможенного контроля, а также другие преимущества для предпринимателей. Целью создания ОЭЗ является стимулирование экономического роста, привлечение иностранных инвестиций и создание новых рабочих мест.',
+    message: botMessages['learnAboutOEZMessage'].message,
     keyboard: InfoPageMenu()
   });
 

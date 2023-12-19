@@ -1,6 +1,10 @@
 import { PalaceConvertor, StatusConvertor } from '@/constants';
-import { findUserById } from '@/telegram-bot/bot.service';
-import { ApplicationCorusel, ApplicationsTypeMenu, SupportPageMenu } from '@/telegram-bot/markups';
+import { botMessages, findUserById } from '@/telegram-bot/bot.service';
+import {
+  ApplicationCoruselMenu,
+  ApplicationsTypeMenu,
+  SupportPageMenu
+} from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { Prisma, PrismaClient, Status } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
@@ -40,30 +44,37 @@ export const AllResidentApplications = async (
       contact_data: true,
       key_project_parameters_application: true,
       building_plans_application: true,
-      rented_area_requests_application: true
+      rented_area_requests_application: {
+        where: {
+          sended_as: 'RESIDENT'
+        }
+      }
     },
     where: {
-      role: 'RESIDENT',
-      key_project_parameters_application: {
-        AND: [
-          {
-            user_telegramId: {
-              not: {
-                equals: undefined
+      AND: [
+        {
+          key_project_parameters_application: {
+            AND: [
+              {
+                user_telegramId: {
+                  not: {
+                    equals: undefined
+                  }
+                }
               }
-            }
+            ],
+            OR: [
+              {
+                status: 'Waiting'
+              },
+              {
+                status: 'Pending',
+                project_support_id: call.from.id
+              }
+            ]
           }
-        ],
-        OR: [
-          {
-            status: 'Waiting'
-          },
-          {
-            status: 'Pending',
-            project_support_id: call.from.id
-          }
-        ]
-      }
+        }
+      ]
     }
   });
 
@@ -71,7 +82,7 @@ export const AllResidentApplications = async (
     await sendToUser({
       bot,
       call,
-      message: 'Нет доступных заявок, находящихся в ожидании',
+      message: botMessages['NoApplicationMessage'].message,
       keyboard: SupportPageMenu()
     });
     return;
@@ -95,7 +106,6 @@ const ResidentApplicationsCorusel = async (
       }
       prevState[call.from.id] = application[page];
     }
-    console.log(page);
     if (call.data.startsWith(`${CALLBACKDATA}_selected`)) {
       const selected = call.data.split('-')[1];
       if (
@@ -123,7 +133,7 @@ const ResidentApplicationsCorusel = async (
         message_id: call.message.message_id
       });
       await bot.editMessageReplyMarkup(
-        ApplicationCorusel(page, page, CALLBACKDATA, true, Number(selected)),
+        ApplicationCoruselMenu(page, page, CALLBACKDATA, true, Number(selected)),
         {
           chat_id: call.message.chat.id,
           message_id: call.message.message_id
@@ -133,15 +143,12 @@ const ResidentApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_accepted`)) {
-      const selected = call.data.split('-')[1];
-      console.log(selected, prevState[call.from.id].telegramId);
-
       await updateDatabase(call, 'Accepted', prisma);
 
       await sendToUser({
         bot,
         call,
-        message: 'Обработано',
+        message: botMessages['ProcessedApplicationMessage'].message,
         keyboard: SupportPageMenu()
       });
       prevState[call.from.id] = null;
@@ -149,15 +156,12 @@ const ResidentApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_declined`)) {
-      const selected = call.data.split('-')[1];
-      console.log(selected);
-
       await updateDatabase(call, 'Declined', prisma);
 
       await sendToUser({
         bot,
         call,
-        message: 'Обработано',
+        message: botMessages['ProcessedApplicationMessage'].message,
         keyboard: SupportPageMenu()
       });
       prevState[call.from.id] = null;
@@ -171,12 +175,12 @@ const ResidentApplicationsCorusel = async (
     bot,
     call,
     message,
-    keyboard: ApplicationCorusel(page, page_count, CALLBACKDATA)
+    keyboard: ApplicationCoruselMenu(page, page_count, CALLBACKDATA)
   });
 };
 
 const ResidentToShortString = async (application: application): Promise<string> => {
-  let resultString = 'Заявка на становление резидентом ОЭЗ\n';
+  let resultString = 'Заявка на получение статуса резидента ОЭЗ"\n';
   resultString += `Текущая стадия проекта: ${application.key_project_parameters_application.project_stage}\n`;
   resultString += `Количество человек работающих над проектом: ${application.key_project_parameters_application.project_crew}\n\n`;
 
@@ -185,15 +189,15 @@ const ResidentToShortString = async (application: application): Promise<string> 
     resultString += `Планируемая дата начала стройки: ${application.building_plans_application.building_start}\n\n`;
   }
 
-  if (application.rented_area_requests_application) {
-    resultString += `Необходимый тип площади: ${application.rented_area_requests_application.area_type}\n`;
-    resultString += `Необходимая площадь (кв.км): ${application.rented_area_requests_application.area_premises}\n`;
-    resultString += `Предполагаемый период начала аренды: ${application.rented_area_requests_application.area_rental_start}\n`;
+  if (application.rented_area_requests_application.length !== 0) {
+    resultString += `Необходимый тип площади: ${application.rented_area_requests_application[0].area_type}\n`;
+    resultString += `Необходимая площадь (кв.км): ${application.rented_area_requests_application[0].area_premises}\n`;
+    resultString += `Предполагаемый период начала аренды: ${application.rented_area_requests_application[0].area_rental_start}\n`;
     resultString += `Выбранный корпус: ${
-      PalaceConvertor[application.rented_area_requests_application.chosen_palace]
+      PalaceConvertor[application.rented_area_requests_application[0].chosen_palace]
     }\n`;
     resultString += `Статус заявки: ${
-      StatusConvertor[application.rented_area_requests_application.status]
+      StatusConvertor[application.rented_area_requests_application[0].status]
     }\n`;
   }
 
@@ -211,12 +215,12 @@ const ResidentToLongString = async (application: application): Promise<string> =
     resultString += `Планируемая дата начала стройки: ${application.building_plans_application.building_start}\n\n`;
   }
 
-  if (application.rented_area_requests_application) {
-    resultString += `Необходимый тип площади: ${application.rented_area_requests_application.area_type}\n`;
-    resultString += `Необходимая площадь (кв.км): ${application.rented_area_requests_application.area_premises}\n`;
-    resultString += `Предполагаемый период начала аренды: ${application.rented_area_requests_application.area_rental_start}\n`;
+  if (application.rented_area_requests_application.length !== 0) {
+    resultString += `Необходимый тип площади: ${application.rented_area_requests_application[0].area_type}\n`;
+    resultString += `Необходимая площадь (кв.км): ${application.rented_area_requests_application[0].area_premises}\n`;
+    resultString += `Предполагаемый период начала аренды: ${application.rented_area_requests_application[0].area_rental_start}\n`;
     resultString += `Выбранный корпус: ${
-      PalaceConvertor[application.rented_area_requests_application.chosen_palace]
+      PalaceConvertor[application.rented_area_requests_application[0].chosen_palace]
     }\n`;
   }
 
@@ -242,7 +246,8 @@ const updateDatabase = async (
   await prisma.keyProjectParametersApplication.update({
     data: {
       status: status,
-      project_support_id: call.from.id
+      project_support_id: call.from.id,
+      project_approval_date: new Date()
     },
     where: {
       project_appliocation_id:
@@ -253,7 +258,8 @@ const updateDatabase = async (
     await prisma.buildingPlansApplication.update({
       data: {
         status: status,
-        building_support_id: call.from.id
+        building_support_id: call.from.id,
+        building_approval_date: new Date()
       },
       where: {
         building_plan_id: prevState[call.from.id].building_plans_application.building_plan_id
@@ -263,11 +269,12 @@ const updateDatabase = async (
     await prisma.rentedAreaRequestsApplication.update({
       data: {
         status: status,
-        area_support_id: call.from.id
+        area_support_id: call.from.id,
+        area_approval_date: new Date()
       },
       where: {
         area_application_id:
-          prevState[call.from.id].rented_area_requests_application.area_application_id
+          prevState[call.from.id].rented_area_requests_application[0].area_application_id
       }
     });
   }

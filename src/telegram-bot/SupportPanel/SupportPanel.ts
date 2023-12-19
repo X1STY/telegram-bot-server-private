@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { SupportPageMenu } from '../markups';
 import { CheckUsersApplication } from './CheckUsersApplication/CheckUsersApplication';
-import { findUserById } from '../bot.service';
+import { botMessages, findUserById, logger } from '../bot.service';
 import { GenerateStatistic } from './GenerateStatistic/GenerateStatistic';
 
 export const PreSupport = async (
@@ -35,8 +35,15 @@ export const SupportPage = async (
   const user = await findUserById(call.from.id, prisma);
 
   if (call.data !== 'support') {
-    CheckUsersApplication(bot, call, prisma);
-    GenerateStatistic(bot, call, prisma);
+    try {
+      await CheckUsersApplication(bot, call, prisma);
+      await GenerateStatistic(bot, call, prisma);
+    } catch (error) {
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+
+      return;
+    }
+
     return;
   }
   if (user.role !== 'SUPPORT') {
@@ -48,13 +55,9 @@ export const SupportPage = async (
     await bot.answerCallbackQuery(call.id);
     await bot.deleteMessage(chatId, call.message.message_id);
   }
-  await bot.sendMessage(
-    chatId,
-    'Меню агента поддержки. У вас есть доступ к обработке заявок, оставленных другими пользователями',
-    {
-      reply_markup: SupportPageMenu()
-    }
-  );
+  await bot.sendMessage(chatId, botMessages['SupportMenuMessage'].message, {
+    reply_markup: SupportPageMenu()
+  });
 
   return;
 };

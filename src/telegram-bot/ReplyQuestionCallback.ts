@@ -15,22 +15,24 @@ export const ReplayQuestionCallback = async (
     responseMsg.from.id !== call.from.id ||
     (type !== null && !isValidType(responseMsg.text, type, numberRange))
   ) {
-    if (responseMsg.text.startsWith('/')) {
-      throw new Error('command');
-    }
-
-    if (type !== null) {
-      // Perform type-specific validation
-      if (!isValidType(responseMsg.text, type, numberRange)) {
-        // Send alert or message for incorrect data type
-        await bot.sendMessage(call.from.id, getErrorMessage(type, numberRange));
+    if (responseMsg.from.id === call.from.id) {
+      if (type !== null) {
+        if (!isValidType(responseMsg.text, type, numberRange)) {
+          if (responseMsg.text.startsWith('/')) {
+            throw new Error('command');
+          }
+          await bot.sendMessage(call.from.id, getErrorMessage(type, numberRange));
+        }
       }
     }
 
     responseMsg = await new Promise<TelegramBot.Message>((resolve) => {
       bot.once('message', resolve);
-      console.log(responseMsg.text);
     });
+  }
+
+  if (responseMsg.text.startsWith('/')) {
+    throw new Error('command');
   }
 
   return responseMsg;
@@ -43,13 +45,15 @@ const isValidType = (
 ): boolean => {
   switch (type) {
     case 'number':
-      return validator.isNumeric(value) && isValidNumberRange(parseFloat(value), numberRange);
+      return (
+        validator.default.isNumeric(value) && isValidNumberRange(parseFloat(value), numberRange)
+      );
     case 'date':
-      return validator.isDate(value);
+      return validator.default.isDate(value);
     case 'email':
-      return validator.isEmail(value);
+      return validator.default.isEmail(value);
     case 'phone':
-      return validator.isMobilePhone(value);
+      return validator.default.isMobilePhone(value);
     default:
       return true;
   }

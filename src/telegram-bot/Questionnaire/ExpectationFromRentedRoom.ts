@@ -1,31 +1,43 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { sendToUser } from '../messages';
 import { ReplayQuestionCallback } from '../ReplyQuestionCallback';
+import { deleteMessagesFromArray } from './uitils/DeleteMessages';
+import { botMessages } from '../bot.service';
 
 export const ExpectationFromRentedRoomQuestionnare = async (
   bot: TelegramBot,
   call: TelegramBot.CallbackQuery
 ): Promise<{ eventDateTime: string; eventSubject: string; eventVisitors: string }> => {
-  await sendToUser({
+  const arr: Array<TelegramBot.Message> = [];
+  let question;
+  question = await sendToUser({
     bot,
     call,
-    message: 'В какую дату и время вы хотели бы арендовать помещение?'
+    message: botMessages['RentForEventDateMessage'].message
   });
   const eventDateTime = await ReplayQuestionCallback(bot, call);
-  await sendToUser({
+  arr.push(question, eventDateTime);
+
+  question = await sendToUser({
     bot,
     call,
-    message: 'Какая цель и тема у проводимого мероприятия?',
+    message: botMessages['RentForEventSubjectMessage'].message,
     canPreviousMessageBeDeleted: false
   });
   const eventSubject = await ReplayQuestionCallback(bot, call);
-  await sendToUser({
+  arr.push(question, eventSubject);
+
+  question = await sendToUser({
     bot,
     call,
-    message: 'Какое количество посетителей вы ожидаете?',
+    message: botMessages['RentForEventVisitorsMessage'].message,
     canPreviousMessageBeDeleted: false
   });
   const eventVisitors = await ReplayQuestionCallback(bot, call);
+  arr.push(question, eventVisitors);
+
+  await deleteMessagesFromArray(bot, call, arr);
+
   return {
     eventDateTime: eventDateTime.text,
     eventSubject: eventSubject.text,

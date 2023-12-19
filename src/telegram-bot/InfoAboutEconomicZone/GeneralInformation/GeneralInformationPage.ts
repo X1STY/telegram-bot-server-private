@@ -5,6 +5,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { ExemptionsPage } from './Exemptions/Exemptions';
 import { ServicesAndSupportPage } from './ServicesAndSupport/ServicesAndSupport';
 import { WayToObtainStatusPage } from './WayToObtainStatus/WayToObtainsStatus';
+import { botMessages } from '@/telegram-bot/bot.service';
 
 export const GeneralInfoPage = async (bot: TelegramBot, call: TelegramBot.CallbackQuery) => {
   if (call.data !== 'general_info') {
@@ -17,8 +18,7 @@ export const GeneralInfoPage = async (bot: TelegramBot, call: TelegramBot.Callba
     bot,
     call,
     photo: pathToImageFolder + '2.png',
-    message:
-      'Особые экономические зоны классифицируются по нескольким признакам.\n\nПо видам хозяйственной деятельности они могут быть торговыми зонами, промышленно-производственными зонами, технико-внедренческими зонами, сервисными зонами, офшорными зонами и комплексными зонами.\n\nПо степени организации - территориальные, анклавные, открытые, функциональные и территориально-функциональные зоны.\n\nЭти различия позволяют адаптировать ОЭЗ под различные потребности и способствуют развитию экономики в разных регионах.',
+    message: botMessages['GeneralInfoMessage'].message,
     keyboard: GeneralInfoMenu()
   });
   await bot.answerCallbackQuery(call.id);

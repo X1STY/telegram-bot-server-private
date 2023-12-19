@@ -1,6 +1,6 @@
 import { ContactDataQuestionnare } from '@/telegram-bot/Questionnaire/ContactData';
 import { ContactDataWithTitleQuestionnare } from '@/telegram-bot/Questionnaire/ContactDataWithTitle';
-import { findUserById } from '@/telegram-bot/bot.service';
+import { botMessages, findUserById } from '@/telegram-bot/bot.service';
 import { BackToRegisteredMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient, Role } from '@prisma/client';
@@ -31,8 +31,7 @@ export const IAmAlreadyRole = async (
       await sendToUser({
         bot,
         call,
-        message:
-          'Вы уже зарегестрированы под одной из ролей, и не можете зарегестрироваться повторно! Попробуйте воспользоваться /registered для доступа к меню для зарегестрированных',
+        message: botMessages['RegisteredError'].message,
         keyboard: BackToRegisteredMenu()
       });
       return;
@@ -73,8 +72,7 @@ export const IAmAlreadyRole = async (
   await sendToUser({
     bot,
     call,
-    message:
-      'Вы зарегестрированы! Попробуйте воспользоваться /registered для доступа к меню зарегестрированных',
+    message: botMessages['RegisteredSuccess'].message,
     keyboard: BackToRegisteredMenu(),
     canPreviousMessageBeDeleted: false
   });

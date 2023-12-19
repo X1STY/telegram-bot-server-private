@@ -1,25 +1,34 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { sendToUser } from '../messages';
 import { ReplayQuestionCallback } from '../ReplyQuestionCallback';
+import { deleteMessagesFromArray } from './uitils/DeleteMessages';
+import { botMessages } from '../bot.service';
 
 export const ProblemsInOEZQuestionnare = async (
   bot: TelegramBot,
   call: TelegramBot.CallbackQuery
 ): Promise<{ problemMain: string; problemAdress: string }> => {
-  await sendToUser({
+  const arr: Array<TelegramBot.Message> = [];
+  let question;
+  question = await sendToUser({
     bot,
     call,
-    message:
-      'Опишите своими словами проблему или ситуацию, требующую технического обслуживания или ремонта'
+    message: botMessages['ProblemMainMessage'].message
   });
   const problemMain = await ReplayQuestionCallback(bot, call);
-  await sendToUser({
+  arr.push(question, problemMain);
+
+  question = await sendToUser({
     bot,
     call,
-    message: 'Укажите адрес: здание, этаж, помещение',
+    message: botMessages['ProblemAdressMessage'].message,
     canPreviousMessageBeDeleted: false
   });
   const problemAdress = await ReplayQuestionCallback(bot, call);
+  arr.push(question, problemAdress);
+
+  await deleteMessagesFromArray(bot, call, arr);
+
   return {
     problemMain: problemMain.text,
     problemAdress: problemAdress.text

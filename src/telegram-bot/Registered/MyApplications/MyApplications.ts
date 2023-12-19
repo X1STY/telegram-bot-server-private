@@ -2,6 +2,7 @@ import { PalaceConvertor, StatusConvertor, pathToImageFolder } from '@/constants
 import { UserApplication } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { Halls, Prisma, PrismaClient } from '@prisma/client';
+import { application } from 'express';
 import TelegramBot from 'node-telegram-bot-api';
 
 type application = Prisma.UserGetPayload<{
@@ -44,7 +45,7 @@ export const MyApplications = async (
   const messages = userObjectToShortInfo(user, halls).split('\n\n');
   if (messages[messages.length - 1] === '\n' || messages[messages.length - 1] === '')
     messages.splice(messages.length - 1, 1);
-  UserApplicationCorusel(bot, call, messages);
+  await UserApplicationCorusel(bot, call, messages);
 };
 
 const UserApplicationCorusel = async (
@@ -152,19 +153,21 @@ const userObjectToShortInfo = (data: application, halls: Halls[]): string => {
   }
 
   // Rented Area Requests Application
-  if (data.rented_area_requests_application) {
+  if (data.rented_area_requests_application && data.rented_area_requests_application.length > 0) {
     resultString += 'Заявка на аренду площади:\n';
-    resultString += `ID заявки: ${data.rented_area_requests_application.area_application_id}\n`;
-    resultString += `Тип площади: ${data.rented_area_requests_application.area_type}\n`;
-    resultString += `Помещения площади: ${data.rented_area_requests_application.area_premises}\n`;
-    resultString += `Начало аренды: ${data.rented_area_requests_application.area_rental_start}\n`;
-    if (data.rented_area_requests_application.chosen_palace) {
-      const description = PalaceConvertor[data.rented_area_requests_application.chosen_palace];
-      resultString += `Выбранный корпус: ${description}\n`;
-    } else {
-      resultString += 'Помещение не выбрано.\n';
-    }
-    resultString += `Статус: ${StatusConvertor[data.rented_area_requests_application.status]}\n\n`;
+    data.rented_area_requests_application.forEach((application) => {
+      resultString += `ID заявки: ${application.area_application_id}\n`;
+      resultString += `Тип площади: ${application.area_type}\n`;
+      resultString += `Помещения площади: ${application.area_premises}\n`;
+      resultString += `Начало аренды: ${application.area_rental_start}\n`;
+      if (application.chosen_palace) {
+        const description = PalaceConvertor[application.chosen_palace];
+        resultString += `Выбранный корпус: ${description}\n`;
+      } else {
+        resultString += 'Корпус не выбран.\n';
+      }
+      resultString += `Статус: ${StatusConvertor[application.status]}\n\n`;
+    });
   }
   return resultString !== '' ? resultString : 'У вас еще нет ни одной заявки!';
 };

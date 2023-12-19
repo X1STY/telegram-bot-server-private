@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { sendToUser } from '../messages';
 import { BackToRegisteredMenu, IAmAlreadyRoleMenu } from '../markups';
 import { IAmAlreadyRole } from './IAmAlreadyRole/IAmAlreadyRole';
-import { findUserById } from '../bot.service';
+import { botMessages, findUserById } from '../bot.service';
 
 export const AlreadyRegistered = async (
   bot: TelegramBot,
@@ -11,7 +11,7 @@ export const AlreadyRegistered = async (
   prisma: PrismaClient
 ) => {
   if (call.data !== 'i_am_already') {
-    IAmAlreadyRole(bot, call, prisma);
+    await IAmAlreadyRole(bot, call, prisma);
     return;
   }
   const user = await findUserById(call.from.id, prisma);
@@ -19,8 +19,7 @@ export const AlreadyRegistered = async (
     await sendToUser({
       bot,
       call,
-      message:
-        'Вы уже зарегестрированы под одной из ролей, и не можете зарегестрироваться повторно! Попробуйте воспользоваться /registered для доступа к меню для зарегестрированных',
+      message: botMessages['RegisteredError'].message,
       keyboard: BackToRegisteredMenu()
     });
     return;

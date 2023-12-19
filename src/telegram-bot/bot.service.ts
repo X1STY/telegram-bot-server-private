@@ -1,9 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import TelegramBot = require('node-telegram-bot-api');
 import { PrismaService } from 'prisma.service';
 import { InfoPageAboutZone } from './InfoAboutEconomicZone/EconomicZonePage';
-import { PrismaClient, User } from '@prisma/client';
-import { pathToImageFolder } from '@/constants';
+import { Palaces, PrismaClient, User } from '@prisma/client';
+import { IUK, pathToImageFolder } from '@/constants';
 import { BecomeAResident } from './BecomeAResident/BecomeAResident';
 import { AlreadyRegistered } from './AlreadyRegistered/AlreadyRegistered';
 import { MainMenu } from './markups';
@@ -15,18 +15,60 @@ import { RentForNotResident } from './RentForNotResident/RentForNotResident';
 import { ExistingOption } from './ExistingOptions/ExistingOptions';
 import { PreRegistered, Registered } from './Registered/Registered';
 import { PreSupport, SupportPage } from './SupportPanel/SupportPanel';
+import { HandleReplyOnQuestion } from './SupportPanel/HandleReplyOnQuestion/HandleReplyOnQuestion';
+import { MessageEntry, MessageService } from '@/message.service';
 process.env['NTBA_FIX_350'] = 'true'; // anti deprecated
+
+export let botMessages: { [name: string]: MessageEntry } = {};
+export let logger: Logger;
+
 @Injectable()
 export class BotService implements OnModuleInit {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messageService: MessageService
+  ) {}
 
   onModuleInit = async () => {
+    botMessages = this.messageService.getMessages();
+    logger = new Logger('bot');
+    arrayOfUK = [
+      {
+        id: Palaces.CIT,
+        photo: pathToImageFolder + 'INVENTUM.png',
+        description: botMessages['CITMessage'].message
+      },
+      {
+        id: Palaces.IC,
+        photo: pathToImageFolder + 'TECHNUM.png',
+        description: botMessages['ICMessage'].message
+      },
+      {
+        id: Palaces.NVC,
+        photo: pathToImageFolder + 'VITUM.png',
+        description: botMessages['NVCMessage'].message
+      },
+      {
+        id: Palaces.ADMINISTRATIVE,
+        photo: pathToImageFolder + 'Administrative.png',
+        description: botMessages['AdministrativePalaceMessage'].message
+      }
+      // {
+      //   id: Palaces.EXPOCENTER,
+      //   photo: pathToImageFolder + 'EXPOCENTER.png',
+      //   description: botMessages['EXPOCENTERMessage'].message
+      // }
+    ];
     await this.botMessage();
   };
 
   botMessage = async () => {
     const bot = new TelegramBot(process.env.BOT_API, { polling: true });
     bot.setMyCommands(commands);
+
+    bot.on('message', (msg) => {
+      HandleReplyOnQuestion(bot, msg, this.prisma);
+    });
 
     bot.onText(/\/reset/, async (msg) => {
       const id = msg.from.id;
@@ -92,7 +134,7 @@ export class BotService implements OnModuleInit {
         pathToImageFolder + 'Обложка.png',
         {
           reply_markup: MainMenu(),
-          caption: `Здравствуйте, ${msg.from.first_name}! Добро пожаловать в бота, посвященного особой экономической зоне Томска. Здесь вы найдете актуальную информацию, а также ответы на ваши вопросы и возможность стать резидентом. Начнем наше увлекательное путешествие по миру экономических преимуществ вместе! 🚀`
+          caption: botMessages['mainMessage'].message
         },
         {
           contentType: 'image/png',
@@ -101,10 +143,10 @@ export class BotService implements OnModuleInit {
       );
     });
     bot.on('polling_error', (msg) => {
-      console.log(msg);
+      logger.error('Polling error: ' + msg.message);
     });
     bot.on('callback_query', async (call) => {
-      console.log(call.from.username, call.data);
+      logger.debug(call.from.username + ' | ' + call.data);
       try {
         await RentForEvent(bot, call, this.prisma);
         await InfoPageAboutZone(bot, call, this.prisma);
@@ -123,7 +165,7 @@ export class BotService implements OnModuleInit {
         //
         await backToMainMenuHandler(bot, call);
       } catch (error) {
-        console.log(error);
+        logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
       }
     });
   };
@@ -158,5 +200,20 @@ const commands = [
   {
     command: 'reset',
     description: 'Очистить данные из БД (все заявки удаляются, роль = незарегестрирован)'
+  },
+  {
+    command: 'registered',
+    description: 'Перейти в меню для зарегестрированных пользоваетелей'
+  },
+  {
+    command: 'support',
+    description: 'Перейти в меню для агентов поддержки'
   }
 ];
+
+export let arrayOfUK: IUK[];
+
+export const updateMessage = (key: string, message: string) => {
+  const service = new MessageService('src\\constants\\botMessages.json');
+  service.updateMessage(key, message);
+};

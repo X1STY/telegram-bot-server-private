@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
-import { findUserById } from '../bot.service';
+import { botMessages, findUserById, logger } from '../bot.service';
 import { AdminPanelMenu } from '../markups';
 import { ManageSupport } from './ManageSupport/ManageSupport';
 import { ChooseSupport } from './ChooseSupport/ChooseSupport';
+import { SendMessageToAllUsers } from './SendMessageToAllUsers/SendMessageToAllUsers';
+import { ManageMessages } from './ManageMessages/ManageMessages';
 
 export const PreAdmin = async (
   bot: TelegramBot,
@@ -35,8 +37,17 @@ export const AdminPage = async (
   const user = await findUserById(call.from.id, prisma);
 
   if (call.data !== 'admin') {
-    ManageSupport(bot, call, prisma);
-    ChooseSupport(bot, call, prisma);
+    try {
+      await ManageSupport(bot, call, prisma);
+      await ChooseSupport(bot, call, prisma);
+      await SendMessageToAllUsers(bot, call, prisma);
+      await ManageMessages(bot, call);
+    } catch (error) {
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+
+      return;
+    }
+
     return;
   }
   if (user.role !== 'ADMIN') {
@@ -48,13 +59,9 @@ export const AdminPage = async (
     await bot.answerCallbackQuery(call.id);
     await bot.deleteMessage(chatId, call.message.message_id);
   }
-  await bot.sendMessage(
-    chatId,
-    'Меню администратора. Вы можете сделать рассылку информации, редактировать агентов поддержки и изменять содержание постов',
-    {
-      reply_markup: AdminPanelMenu()
-    }
-  );
+  await bot.sendMessage(chatId, botMessages['AdminPanelMessage'].message, {
+    reply_markup: AdminPanelMenu()
+  });
 
   return;
 };

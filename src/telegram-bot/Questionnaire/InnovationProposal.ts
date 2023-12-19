@@ -1,6 +1,8 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { sendToUser } from '../messages';
 import { ReplayQuestionCallback } from '../ReplyQuestionCallback';
+import { deleteMessagesFromArray } from './uitils/DeleteMessages';
+import { botMessages } from '../bot.service';
 
 export const InnovationProposalQuestionnare = async (
   bot: TelegramBot,
@@ -12,44 +14,54 @@ export const InnovationProposalQuestionnare = async (
   innovationRes: string;
   innovationInvolve: string;
 }> => {
-  await sendToUser({
+  const arr: Array<TelegramBot.Message> = [];
+  let question;
+  question = await sendToUser({
     bot,
     call,
-    message: 'Для начала опишите проблему, на решение которой направлено предложение.'
+    message: botMessages['InnovationMainMessage'].message
   });
   const innovationMain = await ReplayQuestionCallback(bot, call);
-  await sendToUser({
+  arr.push(question, innovationMain);
+
+  question = await sendToUser({
     bot,
     call,
-    message:
-      'Опишите своими словами суть рационализаторского предложения или идеи - как это должно работать.',
+    message: botMessages['InnovationIdeaMessage'].message,
     canPreviousMessageBeDeleted: false
   });
   const innovationIdea = await ReplayQuestionCallback(bot, call);
-  await sendToUser({
+  arr.push(question, innovationIdea);
+
+  question = await sendToUser({
     bot,
     call,
-    message:
-      'Укажите, если есть, общедоступные примеры внедрения подобных решений - идеальный или близкий к этому вариант.',
+    message: botMessages['InnovationExampleMessage'].message,
     canPreviousMessageBeDeleted: false
   });
   const innovationExample = await ReplayQuestionCallback(bot, call);
-  await sendToUser({
+  arr.push(question, innovationExample);
+
+  question = await sendToUser({
     bot,
     call,
-    message:
-      'Какие на ваш взгляд ресурсы будут необходимы для внедрения вашего предложения? (возможные варианты: предложение может быть реализовано исключительно силами УК ОЭЗ, либо с участием какого-либо органамуниципальной, региональной или федеральной власти, либо с участием представителей какого-либо бизнеса и т.п.)',
+    message: botMessages['InnovationResMessage'].message,
     canPreviousMessageBeDeleted: false
   });
   const innovationRes = await ReplayQuestionCallback(bot, call);
-  await sendToUser({
+  arr.push(question, innovationRes);
+
+  question = await sendToUser({
     bot,
     call,
-    message:
-      'В процессе внедрения вашего предложения возможно ли ваше участие (как компании и/или персональное), и, если да, в какой форме?',
+    message: botMessages['InnovationInvolveMessage'].message,
     canPreviousMessageBeDeleted: false
   });
   const innovationInvolve = await ReplayQuestionCallback(bot, call);
+  arr.push(question, innovationInvolve);
+
+  await deleteMessagesFromArray(bot, call, arr);
+
   return {
     innovationMain: innovationMain.text,
     innovationIdea: innovationIdea.text,

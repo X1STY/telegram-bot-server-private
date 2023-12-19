@@ -1,5 +1,7 @@
 import { ContactDataQuestionnare } from '@/telegram-bot/Questionnaire/ContactData';
 import { ExpectationFromRentedRoomQuestionnare } from '@/telegram-bot/Questionnaire/ExpectationFromRentedRoom';
+import { sendNotification } from '@/telegram-bot/Questionnaire/uitils/SendNotification';
+import { botMessages, logger } from '@/telegram-bot/bot.service';
 import { BackToRegisteredMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
@@ -28,6 +30,14 @@ export const RentForEventDescribeFunc = async (
   });
 
   await bot.answerCallbackQuery(call.id);
+  if (user.role === 'RESIDENT') {
+    await sendToUser({
+      bot,
+      call,
+      message: botMessages['RegisteredError'].message,
+      keyboard: BackToRegisteredMenu()
+    });
+  }
 
   try {
     const { eventDateTime, eventSubject, eventVisitors } =
@@ -47,7 +57,7 @@ export const RentForEventDescribeFunc = async (
   } catch (error) {
     if (error.message === 'command') {
       return;
-    } else console.log(error.message);
+    } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
   }
 
   if (!user.contact_data || !user.contact_data.email) {
@@ -59,7 +69,7 @@ export const RentForEventDescribeFunc = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else console.log(error.message);
+      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
     }
   }
 
@@ -71,8 +81,7 @@ export const RentForEventDescribeFunc = async (
     await sendToUser({
       bot,
       call,
-      message:
-        'Вы зарегестрированы как арендатор для мероприятий! Можете воспользоваться /registered для доступа к меню',
+      message: botMessages['RegisteredSuccess'].message,
       canPreviousMessageBeDeleted: false
     });
   }
@@ -80,8 +89,9 @@ export const RentForEventDescribeFunc = async (
   await sendToUser({
     bot,
     call,
-    message: 'Ваша заявка об аренде направлена ответственным лицам!',
+    message: botMessages['ApplicationSent'].message,
     keyboard: BackToRegisteredMenu(),
     canPreviousMessageBeDeleted: false
   });
+  await sendNotification(bot, prisma, { from: 'EventRent' });
 };

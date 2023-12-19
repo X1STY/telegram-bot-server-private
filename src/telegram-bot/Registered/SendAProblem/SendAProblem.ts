@@ -1,5 +1,7 @@
 import { pathToImageFolder } from '@/constants';
 import { ProblemsInOEZQuestionnare } from '@/telegram-bot/Questionnaire/ProblemsInOEZ';
+import { sendNotification } from '@/telegram-bot/Questionnaire/uitils/SendNotification';
+import { botMessages, logger } from '@/telegram-bot/bot.service';
 import { BackToRegisteredMenu, SendProblemMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient, ProblemType } from '@prisma/client';
@@ -19,7 +21,7 @@ export const SendAProblem = async (
   await sendToUser({
     bot,
     call,
-    message: 'Выберете тип проблемы о которой хоитите сообщить и ответьте на дальнейшие вопросы',
+    message: botMessages['ProblemStartMessage'].message,
     photo: pathToImageFolder + '21.png',
     keyboard: SendProblemMenu()
   });
@@ -50,13 +52,14 @@ export const handleReport = async (
     });
   } catch (error) {
     if (error.message === 'command') return;
-    else console.log(error.message);
+    else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
   }
   await sendToUser({
     bot,
     call,
-    message: 'Отправлено!',
+    message: botMessages['ApplicationSent'].message,
     keyboard: BackToRegisteredMenu(),
     canPreviousMessageBeDeleted: false
   });
+  await sendNotification(bot, prisma, { from: 'Problem' });
 };

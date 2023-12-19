@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { PrismaService } from './prisma.service';
 import { BotService } from './telegram-bot/bot.service';
+import { MessageService } from './message.service';
+import {} from './constants/';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [PrismaService, BotService, AppService]
+  providers: [
+    PrismaService,
+    BotService,
+    {
+      provide: MessageService,
+      useValue: new MessageService('src\\constants\\botMessages.json')
+    }
+  ]
 })
 export class AppModule {}

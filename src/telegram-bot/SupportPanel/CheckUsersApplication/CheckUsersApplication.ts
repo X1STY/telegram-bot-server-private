@@ -1,4 +1,4 @@
-import { findUserById } from '@/telegram-bot/bot.service';
+import { botMessages, findUserById, logger } from '@/telegram-bot/bot.service';
 import { ApplicationsTypeMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
@@ -16,12 +16,19 @@ export const CheckUsersApplication = async (
   prisma: PrismaClient
 ) => {
   if (call.data !== 'application_menu') {
-    AllBookingApplications(bot, call, prisma);
-    AllProblemApplications(bot, call, prisma);
-    AllEventApplications(bot, call, prisma);
-    AllInnovationApplications(bot, call, prisma);
-    AllAreaApplications(bot, call, prisma);
-    AllResidentApplications(bot, call, prisma);
+    try {
+      await AllBookingApplications(bot, call, prisma);
+      await AllProblemApplications(bot, call, prisma);
+      await AllEventApplications(bot, call, prisma);
+      await AllInnovationApplications(bot, call, prisma);
+      await AllAreaApplications(bot, call, prisma);
+      await AllResidentApplications(bot, call, prisma);
+    } catch (error) {
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+
+      return;
+    }
+
     return;
   }
   const user = await findUserById(call.from.id, prisma);
@@ -34,7 +41,7 @@ export const CheckUsersApplication = async (
   await sendToUser({
     bot,
     call,
-    message: 'Какой тип заявок рассмотреть?',
+    message: botMessages['ApplicationTypeMessage'].message,
     keyboard: ApplicationsTypeMenu()
   });
 };

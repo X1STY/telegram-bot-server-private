@@ -1,10 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
-import { findUserById } from '../bot.service';
+import { botMessages, findUserById } from '../bot.service';
 import { sendToUser } from '../messages';
 import { BackToRegisteredMenu, BecomeAResidentMenu } from '../markups';
 import { pathToImageFolder } from '@/constants';
 import { ProjectParameters } from './ProjectParameters/ProjectParameters';
+import { DocumentsToObtainAResidentStatus } from '../InfoAboutEconomicZone/RegulatoryDocuments/DocumentsToBecomeAResident/DocumentsToBecomeAResident';
 
 export const BecomeAResident = async (
   bot: TelegramBot,
@@ -13,16 +14,16 @@ export const BecomeAResident = async (
 ) => {
   if (call.data !== 'become_a_resident') {
     await ProjectParameters(bot, call, prisma);
+    await DocumentsToObtainAResidentStatus(bot, call);
     return;
   }
 
   const user = await findUserById(call.from.id, prisma);
-  if (user.role !== 'UNREGISTERED') {
+  if (user.role === 'RESIDENT') {
     await sendToUser({
       bot,
       call,
-      message:
-        'Вы уже зарегестрированы, и не можете снова пройти регистрацию на статус резидента!\nВоспользуйтесть /registered для доступа в меню',
+      message: botMessages['RegisteredError'].message,
       keyboard: BackToRegisteredMenu()
     });
     return;
@@ -31,8 +32,7 @@ export const BecomeAResident = async (
   await sendToUser({
     bot,
     call,
-    message:
-      'Резиденты ОЭЗ пользуются льготами и преференциями, могут применять таможенную процедуру свободной таможенной зоны.',
+    message: botMessages['ResidentMessage'].message,
     photo: pathToImageFolder + '16.png',
     keyboard: BecomeAResidentMenu()
   });

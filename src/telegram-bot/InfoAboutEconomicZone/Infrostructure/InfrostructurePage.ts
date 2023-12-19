@@ -1,5 +1,4 @@
 import { PalacesMenu } from '@/telegram-bot/markups';
-import { sendToUser } from '@/telegram-bot/messages';
 import TelegramBot from 'node-telegram-bot-api';
 import { NorthPalaceInfo } from './NorthPalace/NorthPalacePage';
 import { SouthPalaceInfo } from './SouthPalace/SouthPalacePage';
@@ -15,15 +14,12 @@ export const InfoAboutInfrostructure = async (
     await NorthPalaceInfo(bot, call);
     return;
   }
+  await bot.answerCallbackQuery(call.id);
 
-  await sendToUser({
-    bot,
-    call,
-    message:
-      'В нашем городе существует две площадки Особых экономических зон: Южная и Северная.\nВыберете интересующую Вас.',
-    keyboard: PalacesMenu()
+  await bot.editMessageReplyMarkup(PalacesMenu(), {
+    chat_id: call.from.id,
+    message_id: call.message.message_id
   });
 
-  await bot.answerCallbackQuery(call.id);
   return;
 };

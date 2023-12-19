@@ -1,5 +1,6 @@
+import { deleteMessagesFromArray } from '@/telegram-bot/Questionnaire/uitils/DeleteMessages';
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { findUserById } from '@/telegram-bot/bot.service';
+import { botMessages, findUserById, logger } from '@/telegram-bot/bot.service';
 import { BackToAdminPanel, BackToRegisteredMenu, ChangeUserDataMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
@@ -21,7 +22,7 @@ export const ChangeContacts = async (
   await sendToUser({
     bot,
     call,
-    message: 'Какие данные необходимо поменять?',
+    message: botMessages['ChangeUserDataMessage'].message,
     keyboard: ChangeUserDataMenu(user.role)
   });
 };
@@ -35,9 +36,10 @@ export const handleChangeData = async (
   if (!call.data.startsWith('change_my-') && !call.data.startsWith('change_support-')) {
     return;
   }
+  const arr: Array<TelegramBot.Message> = [];
   bot.answerCallbackQuery(call.id);
   const thingToChange = call.data.split('-')[1];
-  await sendToUser({
+  const question = await sendToUser({
     bot,
     call,
     message: 'Введите новые данные.'
@@ -47,20 +49,21 @@ export const handleChangeData = async (
     if (thingToChange === 'phone') type = 'phone';
     if (thingToChange === 'email') type = 'email';
 
-    const response = (await ReplayQuestionCallback(bot, call, type)).text;
+    const response = await ReplayQuestionCallback(bot, call, type);
     await prisma.contactData.update({
       data: {
-        [thingToChange]: response
+        [thingToChange]: response.text
       },
       where: {
         user_telegramId: userId ?? call.from.id
       }
     });
+    arr.push(question, response);
   } catch (error) {
     if (error.message === 'command') {
       return;
     } else {
-      console.log(error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
     }
   }
 
@@ -71,4 +74,5 @@ export const handleChangeData = async (
     keyboard: call.data.includes('support') ? BackToAdminPanel() : BackToRegisteredMenu(),
     canPreviousMessageBeDeleted: false
   });
+  await deleteMessagesFromArray(bot, call, arr);
 };

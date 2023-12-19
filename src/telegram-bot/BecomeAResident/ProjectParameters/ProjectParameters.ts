@@ -4,7 +4,7 @@ import { Palaces, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { RealizationType } from './RealizationType/RealizationType';
 import { BackToRegisteredMenu, RealizationTypeMenu } from '@/telegram-bot/markups';
-import { findUserById } from '@/telegram-bot/bot.service';
+import { botMessages, findUserById, logger } from '@/telegram-bot/bot.service';
 
 export const ProjectParameters = async (
   bot: TelegramBot,
@@ -25,12 +25,11 @@ export const ProjectParametersFunc = async (
   chosen_palace?: Palaces
 ) => {
   const user = await findUserById(call.from.id, prisma);
-  if (user.role !== 'UNREGISTERED') {
+  if (user.role === 'RESIDENT') {
     await sendToUser({
       bot,
       call,
-      message:
-        'Вы уже зарегестрированы, и не можете снова пройти регистрацию на статус резидента!\nВоспользуйтесть /registered для доступа в меню',
+      message: botMessages['RegisteredError'].message,
       keyboard: BackToRegisteredMenu()
     });
     return;
@@ -65,7 +64,9 @@ export const ProjectParametersFunc = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else console.log(error.message);
+      } else {
+        logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      }
     }
   }
   await sendToUser({

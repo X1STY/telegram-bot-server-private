@@ -1,6 +1,10 @@
 import { StatusConvertor } from '@/constants';
-import { findUserById } from '@/telegram-bot/bot.service';
-import { ApplicationCorusel, ApplicationsTypeMenu, SupportPageMenu } from '@/telegram-bot/markups';
+import { botMessages, findUserById } from '@/telegram-bot/bot.service';
+import {
+  ApplicationCoruselMenu,
+  ApplicationsTypeMenu,
+  SupportPageMenu
+} from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { Prisma, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
@@ -60,7 +64,7 @@ export const AllBookingApplications = async (
     await sendToUser({
       bot,
       call,
-      message: 'Нет доступных заявок, находящихся в ожидании',
+      message: botMessages['NoApplicationMessage'].message,
       keyboard: SupportPageMenu()
     });
     return;
@@ -84,7 +88,6 @@ const BookingApplicationsCorusel = async (
       }
       prevState[call.from.id] = application[page];
     }
-    console.log(page);
     if (call.data.startsWith(`${CALLBACKDATA}_selected`)) {
       const selected = call.data.split('-')[1];
       if (
@@ -119,7 +122,7 @@ const BookingApplicationsCorusel = async (
         message_id: call.message.message_id
       });
       await bot.editMessageReplyMarkup(
-        ApplicationCorusel(page, page, CALLBACKDATA, true, Number(selected)),
+        ApplicationCoruselMenu(page, page, CALLBACKDATA, true, Number(selected)),
         {
           chat_id: call.message.chat.id,
           message_id: call.message.message_id
@@ -130,8 +133,6 @@ const BookingApplicationsCorusel = async (
 
     if (call.data.startsWith(`${CALLBACKDATA}_accepted`)) {
       const selected = call.data.split('-')[1];
-      console.log(selected, prevState[call.from.id].hall_application_id);
-
       await prisma.bookingHallApplication.update({
         data: {
           status: 'Accepted',
@@ -145,7 +146,7 @@ const BookingApplicationsCorusel = async (
       await sendToUser({
         bot,
         call,
-        message: 'Обработано',
+        message: botMessages['ProcessedApplicationMessage'].message,
         keyboard: SupportPageMenu()
       });
       prevState[call.from.id] = null;
@@ -167,7 +168,7 @@ const BookingApplicationsCorusel = async (
       await sendToUser({
         bot,
         call,
-        message: 'Обработано',
+        message: botMessages['ProcessedApplicationMessage'].message,
         keyboard: SupportPageMenu()
       });
       prevState[call.from.id] = null;
@@ -181,7 +182,7 @@ const BookingApplicationsCorusel = async (
     bot,
     call,
     message,
-    keyboard: ApplicationCorusel(page, page_count, CALLBACKDATA)
+    keyboard: ApplicationCoruselMenu(page, page_count, CALLBACKDATA)
   });
 };
 

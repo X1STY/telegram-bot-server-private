@@ -1,4 +1,5 @@
 import { pathToImageFolder } from '@/constants';
+import { botMessages } from '@/telegram-bot/bot.service';
 import { BackToNorthMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import TelegramBot from 'node-telegram-bot-api';
@@ -13,8 +14,8 @@ export const AdministrativeСenterPage = async (
   await sendToUser({
     bot,
     call,
-    photo: pathToImageFolder + 'v2a.png',
-    message: 'Информация об администривном корпусе',
+    photo: pathToImageFolder + 'Administrative.png',
+    message: botMessages['AdministrativePalaceMessage'].message,
     keyboard: BackToNorthMenu()
   });
 

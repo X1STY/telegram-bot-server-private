@@ -1,10 +1,11 @@
-import { IUK, arrayOfUK } from '@/constants';
+import { IUK } from '@/constants';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { sendToUser } from '../messages';
 import { ExistingOptionsChooseMenu } from '../markups';
 import { RentForNotResidentSendRequirementsFunc } from '../RentForNotResident/SendRequirements/SendRequirements';
 import { ProjectParametersFunc } from '../BecomeAResident/ProjectParameters/ProjectParameters';
+import { arrayOfUK } from '../bot.service';
 
 export const ExistingOption = async (
   bot: TelegramBot,
@@ -17,15 +18,15 @@ export const ExistingOption = async (
 
     if (call.data.includes('selected')) {
       if (from === 'RESIDENT') {
-        ProjectParametersFunc(bot, call, prisma, arrayOfUK[page].id);
+        await ProjectParametersFunc(bot, call, prisma, arrayOfUK[page].id);
       }
       if (from === 'NORESIDENT') {
-        RentForNotResidentSendRequirementsFunc(bot, call, prisma, arrayOfUK[page].id);
+        await RentForNotResidentSendRequirementsFunc(bot, call, prisma, arrayOfUK[page].id);
       }
       return;
     }
 
-    ExistingOptionsCorusel(
+    await ExistingOptionsCorusel(
       bot,
       call,
       arrayOfUK,

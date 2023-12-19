@@ -1,4 +1,5 @@
 import { pathToImageFolder } from '@/constants';
+import { botMessages } from '@/telegram-bot/bot.service';
 import { CITCenterMenu, ICCenterMenu, NVCCenterMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import TelegramBot from 'node-telegram-bot-api';
@@ -7,12 +8,11 @@ export const ICCenter = async (bot: TelegramBot, call: TelegramBot.CallbackQuery
   if (call.data !== 'ic') {
     return;
   }
-  //https://yandex.ru/profile/-/CDaLnLYH
   await sendToUser({
     bot,
     call,
     photo: pathToImageFolder + 'TECHNUM.png',
-    message: 'Информация об ИЦ УК',
+    message: botMessages['ICContactsMessage'].message,
     keyboard: ICCenterMenu()
   });
 };
@@ -20,12 +20,11 @@ export const CITCenter = async (bot: TelegramBot, call: TelegramBot.CallbackQuer
   if (call.data !== 'cit') {
     return;
   }
-  //https://yandex.ru/profile/-/CDaLnLYH
   await sendToUser({
     bot,
     call,
     photo: pathToImageFolder + 'INVENTUM.png',
-    message: 'Информация об ЦИТ УК',
+    message: botMessages['CITContactsMessage'].message,
     keyboard: CITCenterMenu()
   });
 };
@@ -33,12 +32,11 @@ export const NVCCenter = async (bot: TelegramBot, call: TelegramBot.CallbackQuer
   if (call.data !== 'nvc') {
     return;
   }
-  //https://yandex.ru/profile/-/CDaLnLYH
   await sendToUser({
     bot,
     call,
     photo: pathToImageFolder + 'VITUM.png',
-    message: 'Информация об НВЦ УК',
+    message: botMessages['NVCContactsMessage'].message,
     keyboard: NVCCenterMenu()
   });
 };
