@@ -52,7 +52,10 @@ export const RealizationType = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      } else
+        logger.error(
+          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
+        );
     }
   }
 
@@ -72,7 +75,10 @@ export const RealizationType = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      } else
+        logger.error(
+          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
+        );
     }
   }
 
@@ -95,7 +101,10 @@ export const RealizationType = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      } else
+        logger.error(
+          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
+        );
     }
   }
 

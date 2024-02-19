@@ -13,7 +13,7 @@ export const ManageSupport = async (
     try {
       await AddSupport(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
     return;

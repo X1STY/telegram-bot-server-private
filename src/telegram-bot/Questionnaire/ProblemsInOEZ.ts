@@ -7,7 +7,7 @@ import { botMessages } from '../bot.service';
 export const ProblemsInOEZQuestionnare = async (
   bot: TelegramBot,
   call: TelegramBot.CallbackQuery
-): Promise<{ problemMain: string; problemAdress: string }> => {
+): Promise<{ problemMain: string; problemPhotoId: string; problemAdress: string }> => {
   const arr: Array<TelegramBot.Message> = [];
   let question;
   question = await sendToUser({
@@ -26,11 +26,13 @@ export const ProblemsInOEZQuestionnare = async (
   });
   const problemAdress = await ReplayQuestionCallback(bot, call);
   arr.push(question, problemAdress);
-
   await deleteMessagesFromArray(bot, call, arr);
 
   return {
-    problemMain: problemMain.text,
+    problemMain: problemMain.text ?? problemMain.caption,
+    problemPhotoId: problemMain.photo
+      ? problemMain.photo[problemMain.photo.length - 1].file_id
+      : null,
     problemAdress: problemAdress.text
   };
 };

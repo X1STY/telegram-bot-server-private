@@ -10,7 +10,7 @@ export const ManageMessages = async (bot: TelegramBot, call: TelegramBot.Callbac
       await ChangeMessage(bot, call);
       await SeeAllMessages(bot, call);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
 

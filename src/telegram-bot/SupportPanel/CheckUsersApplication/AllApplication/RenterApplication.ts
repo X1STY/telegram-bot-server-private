@@ -8,7 +8,10 @@ import {
 import { sendToUser } from '@/telegram-bot/messages';
 import { Prisma, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
+import { sendNotification } from '../utils/SendNotification';
+import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
 
+const category = 'Аренда для мероприятий';
 const prevState: { [id: number]: application } = {};
 const CALLBACKDATA = `all_eventrenter`;
 type application = Prisma.AreaExpectationsApplicationGetPayload<{
@@ -107,6 +110,15 @@ const EventApplicationsCorusel = async (
         prevState[call.from.id] = undefined;
         return;
       }
+      if (prevState[call.from.id].status === 'Waiting') {
+        await sendNotification(
+          bot,
+          Number(prevState[call.from.id].user_telegramId),
+          prevState[call.from.id].event_application_id,
+          category,
+          'PENDING'
+        );
+      }
       await prisma.areaExpectationsApplication.update({
         data: {
           status: 'Pending',
@@ -114,6 +126,18 @@ const EventApplicationsCorusel = async (
         },
         where: {
           event_application_id: prevState[call.from.id].event_application_id
+        }
+      });
+      prevState[call.from.id] = await prisma.areaExpectationsApplication.findFirst({
+        where: {
+          event_application_id: prevState[call.from.id].event_application_id
+        },
+        include: {
+          user: {
+            include: {
+              contact_data: true
+            }
+          }
         }
       });
       const message = await EventToLongString(application[selected], prisma);
@@ -132,13 +156,28 @@ const EventApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_accepted`)) {
-      const selected = call.data.split('-')[1];
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].user_telegramId),
+        prevState[call.from.id].event_application_id,
+        category,
+        'ACCEPTED',
+        comment.text
+      );
 
       await prisma.areaExpectationsApplication.update({
         data: {
           status: 'Accepted',
           event_support_id: call.from.id,
-          event_approval_date: new Date()
+          event_approval_date: new Date(),
+          event_support_comment: comment.text
         },
         where: {
           event_application_id: prevState[call.from.id].event_application_id
@@ -155,12 +194,27 @@ const EventApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_declined`)) {
-      const selected = call.data.split('-')[1];
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].user_telegramId),
+        prevState[call.from.id].event_application_id,
+        category,
+        'DECLINED',
+        comment.text
+      );
       await prisma.areaExpectationsApplication.update({
         data: {
           status: 'Declined',
           event_support_id: call.from.id,
-          event_approval_date: new Date()
+          event_approval_date: new Date(),
+          event_support_comment: comment.text
         },
         where: {
           event_application_id: prevState[call.from.id].event_application_id

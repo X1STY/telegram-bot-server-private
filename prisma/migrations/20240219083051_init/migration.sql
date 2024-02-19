@@ -10,6 +10,9 @@ CREATE TYPE "ProblemType" AS ENUM ('ELECTRICITY', 'WATERSUPPLY', 'HEATING', 'COM
 -- CreateEnum
 CREATE TYPE "Palaces" AS ENUM ('CIT', 'IC', 'NVC', 'EC', 'EXPOCENTER', 'ADMINISTRATIVE');
 
+-- CreateEnum
+CREATE TYPE "RentSender" AS ENUM ('RESIDENT', 'OTHER');
+
 -- CreateTable
 CREATE TABLE "ContactData" (
     "name" TEXT NOT NULL,
@@ -36,7 +39,7 @@ CREATE TABLE "User" (
 CREATE TABLE "Halls" (
     "id" SERIAL NOT NULL,
     "description" TEXT NOT NULL,
-    "photo" BYTEA NOT NULL,
+    "photo_path" TEXT NOT NULL,
 
     CONSTRAINT "Halls_pkey" PRIMARY KEY ("id")
 );
@@ -48,9 +51,11 @@ CREATE TABLE "ProblemApplication" (
     "problem_main" TEXT NOT NULL,
     "problem_adress" TEXT NOT NULL,
     "status" "Status" NOT NULL,
+    "photo_id" TEXT,
     "problem_dispatch_date" TIMESTAMP(3) NOT NULL,
     "problem_approval_date" TIMESTAMP(3),
-    "problem_support_id" INTEGER,
+    "problem_support_id" BIGINT,
+    "problem_support_comment" TEXT,
     "user_telegramId" BIGINT NOT NULL,
 
     CONSTRAINT "ProblemApplication_pkey" PRIMARY KEY ("problem_application_id")
@@ -65,7 +70,8 @@ CREATE TABLE "AreaExpectationsApplication" (
     "status" "Status" NOT NULL,
     "event_dispatch_date" TIMESTAMP(3) NOT NULL,
     "event_approval_date" TIMESTAMP(3),
-    "event_support_id" INTEGER,
+    "event_support_id" BIGINT,
+    "event_support_comment" TEXT,
     "chosen_hall_id" INTEGER,
     "user_telegramId" BIGINT NOT NULL,
 
@@ -80,9 +86,11 @@ CREATE TABLE "RentedAreaRequestsApplication" (
     "area_rental_start" TEXT NOT NULL,
     "status" "Status" NOT NULL,
     "chosen_palace" "Palaces",
+    "sended_as" "RentSender" NOT NULL,
     "area_dispatch_date" TIMESTAMP(3) NOT NULL,
     "area_approval_date" TIMESTAMP(3),
-    "area_support_id" INTEGER,
+    "area_support_id" BIGINT,
+    "area_support_comment" TEXT,
     "user_telegramId" BIGINT NOT NULL,
 
     CONSTRAINT "RentedAreaRequestsApplication_pkey" PRIMARY KEY ("area_application_id")
@@ -97,7 +105,8 @@ CREATE TABLE "KeyProjectParametersApplication" (
     "status" "Status" NOT NULL,
     "project_dispatch_date" TIMESTAMP(3) NOT NULL,
     "project_approval_date" TIMESTAMP(3),
-    "project_support_id" INTEGER,
+    "project_support_id" BIGINT,
+    "project_support_comment" TEXT,
     "user_telegramId" BIGINT NOT NULL,
 
     CONSTRAINT "KeyProjectParametersApplication_pkey" PRIMARY KEY ("project_appliocation_id")
@@ -111,7 +120,8 @@ CREATE TABLE "BuildingPlansApplication" (
     "status" "Status" NOT NULL,
     "building_dispatch_date" TIMESTAMP(3) NOT NULL,
     "building_approval_date" TIMESTAMP(3),
-    "building_support_id" INTEGER,
+    "building_support_id" BIGINT,
+    "building_support_comment" TEXT,
     "user_telegramId" BIGINT NOT NULL,
 
     CONSTRAINT "BuildingPlansApplication_pkey" PRIMARY KEY ("building_plan_id")
@@ -127,7 +137,8 @@ CREATE TABLE "BookingHallApplication" (
     "status" "Status" NOT NULL,
     "hall_dispatch_date" TIMESTAMP(3) NOT NULL,
     "hall_approval_date" TIMESTAMP(3),
-    "hall_support_id" INTEGER,
+    "hall_support_id" BIGINT,
+    "hall_support_comment" TEXT,
     "chosen_hall_id" INTEGER NOT NULL,
     "user_telegramId" BIGINT NOT NULL,
 
@@ -145,7 +156,8 @@ CREATE TABLE "InnovationProposalApplication" (
     "status" "Status" NOT NULL,
     "innovation_dispatch_date" TIMESTAMP(3) NOT NULL,
     "innovation_approval_date" TIMESTAMP(3),
-    "innovation_support_id" INTEGER,
+    "innovation_support_id" BIGINT,
+    "innovation_support_comment" TEXT,
     "user_telegramId" BIGINT NOT NULL,
 
     CONSTRAINT "InnovationProposalApplication_pkey" PRIMARY KEY ("innovation_application_id")
@@ -168,17 +180,14 @@ CREATE TABLE "QuestionsToSupport" (
 -- CreateTable
 CREATE TABLE "QuestionsChatIds" (
     "message_id" INTEGER NOT NULL,
-    "message_support_chat_id" INTEGER NOT NULL,
-    "support_id" INTEGER NOT NULL,
+    "message_support_chat_id" BIGINT NOT NULL,
+    "support_id" BIGINT NOT NULL,
 
     CONSTRAINT "QuestionsChatIds_pkey" PRIMARY KEY ("message_id","message_support_chat_id","support_id")
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ContactData_email_key" ON "ContactData"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "RentedAreaRequestsApplication_user_telegramId_key" ON "RentedAreaRequestsApplication"("user_telegramId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "KeyProjectParametersApplication_user_telegramId_key" ON "KeyProjectParametersApplication"("user_telegramId");

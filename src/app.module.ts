@@ -10,7 +10,7 @@ import {} from './constants/';
     BotService,
     {
       provide: MessageService,
-      useValue: new MessageService('src\\constants\\botMessages.json')
+      useValue: new MessageService('src/constants/botMessages.json')
     }
   ]
 })

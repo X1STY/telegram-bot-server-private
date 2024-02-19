@@ -39,20 +39,25 @@ export const handleReport = async (
 
   const problemType = ProblemType[call.data.split('-')[1]];
   try {
-    const { problemMain, problemAdress } = await ProblemsInOEZQuestionnare(bot, call);
+    const { problemMain, problemPhotoId, problemAdress } = await ProblemsInOEZQuestionnare(
+      bot,
+      call
+    );
     await prisma.problemApplication.create({
       data: {
         problem_reason: problemType,
         problem_adress: problemAdress,
         problem_main: problemMain,
         status: 'Waiting',
+        photo_id: problemPhotoId,
         user_telegramId: call.from.id,
         problem_dispatch_date: new Date()
       }
     });
   } catch (error) {
     if (error.message === 'command') return;
-    else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+    else
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
   await sendToUser({
     bot,

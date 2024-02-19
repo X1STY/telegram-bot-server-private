@@ -6,6 +6,7 @@ import { ManageSupport } from './ManageSupport/ManageSupport';
 import { ChooseSupport } from './ChooseSupport/ChooseSupport';
 import { SendMessageToAllUsers } from './SendMessageToAllUsers/SendMessageToAllUsers';
 import { ManageMessages } from './ManageMessages/ManageMessages';
+import { ManageHalls } from './ManageHalls/ManageHalls';
 
 export const PreAdmin = async (
   bot: TelegramBot,
@@ -42,8 +43,9 @@ export const AdminPage = async (
       await ChooseSupport(bot, call, prisma);
       await SendMessageToAllUsers(bot, call, prisma);
       await ManageMessages(bot, call);
+      await ManageHalls(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
       return;
     }

@@ -70,53 +70,6 @@ export class BotService implements OnModuleInit {
       HandleReplyOnQuestion(bot, msg, this.prisma);
     });
 
-    bot.onText(/\/reset/, async (msg) => {
-      const id = msg.from.id;
-      await this.prisma.problemApplication.deleteMany({
-        where: { user_telegramId: id }
-      });
-
-      await this.prisma.contactData.deleteMany({
-        where: {
-          user_telegramId: id
-        }
-      });
-
-      await this.prisma.areaExpectationsApplication.deleteMany({
-        where: { user_telegramId: id }
-      });
-
-      await this.prisma.rentedAreaRequestsApplication.deleteMany({
-        where: { user_telegramId: id }
-      });
-
-      await this.prisma.keyProjectParametersApplication.deleteMany({
-        where: { user_telegramId: id }
-      });
-
-      await this.prisma.buildingPlansApplication.deleteMany({
-        where: { user_telegramId: id }
-      });
-
-      await this.prisma.bookingHallApplication.deleteMany({
-        where: { user_telegramId: id }
-      });
-
-      await this.prisma.innovationProposalApplication.deleteMany({
-        where: { user_telegramId: id }
-      });
-
-      await this.prisma.user.update({
-        where: { telegramId: id },
-        data: { role: 'UNREGISTERED' }
-      });
-
-      await bot.sendMessage(msg.chat.id, 'successfully', {
-        reply_markup: MainMenu()
-      });
-      return;
-    });
-
     bot.onText(/\/registered/, async (msg) => {
       await PreRegistered(bot, msg, this.prisma);
     });
@@ -134,7 +87,8 @@ export class BotService implements OnModuleInit {
         pathToImageFolder + 'Обложка.png',
         {
           reply_markup: MainMenu(),
-          caption: botMessages['mainMessage'].message
+          caption: botMessages['mainMessage'].message,
+          parse_mode: 'Markdown'
         },
         {
           contentType: 'image/png',
@@ -165,7 +119,9 @@ export class BotService implements OnModuleInit {
         //
         await backToMainMenuHandler(bot, call);
       } catch (error) {
-        logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+        logger.error(
+          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
+        );
       }
     });
   };
@@ -195,25 +151,21 @@ const commands = [
   },
   {
     command: 'admin',
-    description: 'Авторизация в админ-панель'
-  },
-  {
-    command: 'reset',
-    description: 'Очистить данные из БД (все заявки удаляются, роль = незарегестрирован)'
+    description: 'Меню администратора'
   },
   {
     command: 'registered',
-    description: 'Перейти в меню для зарегестрированных пользоваетелей'
+    description: 'Меню для зарегестрированных пользоваетелей'
   },
   {
     command: 'support',
-    description: 'Перейти в меню для агентов поддержки'
+    description: 'Меню для агентов поддержки'
   }
 ];
 
 export let arrayOfUK: IUK[];
 
 export const updateMessage = (key: string, message: string) => {
-  const service = new MessageService('src\\constants\\botMessages.json');
+  const service = new MessageService('src/constants/botMessages.json');
   service.updateMessage(key, message);
 };

@@ -1,4 +1,9 @@
-import { PalaceConvertor, StatusConvertor, pathToImageFolder } from '@/constants';
+import {
+  PalaceConvertor,
+  ProblemTypeConverter,
+  StatusConvertor,
+  pathToImageFolder
+} from '@/constants';
 import { UserApplication } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { Halls, Prisma, PrismaClient } from '@prisma/client';
@@ -86,7 +91,10 @@ const userObjectToShortInfo = (data: application, halls: Halls[]): string => {
         resultString += 'Помещение не выбрано.\n';
       }
 
-      resultString += `Статус: ${StatusConvertor[application.status]}\n\n`;
+      resultString += `Статус: ${StatusConvertor[application.status]}\n`;
+      application.event_support_comment
+        ? (resultString += `Коментарий сотрудника поддержки: ${application.event_support_comment}\n\n`)
+        : (resultString += '\n');
     });
   }
 
@@ -104,7 +112,10 @@ const userObjectToShortInfo = (data: application, halls: Halls[]): string => {
       } else {
         resultString += 'Помещение не выбрано.\n';
       }
-      resultString += `Статус: ${StatusConvertor[application.status]}\n\n`;
+      resultString += `Статус: ${StatusConvertor[application.status]}\n`;
+      application.hall_support_comment
+        ? (resultString += `Коментарий сотрудника поддержки: ${application.hall_support_comment}\n\n`)
+        : (resultString += '\n');
     });
   }
 
@@ -114,7 +125,10 @@ const userObjectToShortInfo = (data: application, halls: Halls[]): string => {
     resultString += `ID заявки: ${data.building_plans_application.building_plan_id}\n`;
     resultString += `Площадь земельного участка: ${data.building_plans_application.building_premises}\n`;
     resultString += `Дата начала строительства: ${data.building_plans_application.building_start}\n`;
-    resultString += `Статус: ${StatusConvertor[data.building_plans_application.status]}\n\n`;
+    resultString += `Статус: ${StatusConvertor[data.building_plans_application.status]}\n`;
+    data.building_plans_application.building_support_comment
+      ? (resultString += `Коментарий сотрудника поддержки: ${data.building_plans_application.building_support_comment}\n\n`)
+      : (resultString += '\n');
   }
 
   // Innovation Proposal Application
@@ -124,7 +138,10 @@ const userObjectToShortInfo = (data: application, halls: Halls[]): string => {
       resultString += `ID заявки: ${application.innovation_application_id}\n`;
       resultString += `Решение направлено на проблему: ${application.innovation_main}\n`;
       resultString += `Идея инновации: ${application.innovation_idea}\n`;
-      resultString += `Статус: ${StatusConvertor[application.status]}\n\n`;
+      resultString += `Статус: ${StatusConvertor[application.status]}\n`;
+      application.innovation_support_comment
+        ? (resultString += `Коментарий сотрудника поддержки: ${application.innovation_support_comment}\n\n`)
+        : (resultString += '\n');
     });
   }
 
@@ -135,9 +152,10 @@ const userObjectToShortInfo = (data: application, halls: Halls[]): string => {
     resultString += `Этап проекта: ${data.key_project_parameters_application.project_stage}\n`;
     resultString += `Команда проекта: ${data.key_project_parameters_application.project_crew}\n`;
     resultString += `Объем проекта: ${data.key_project_parameters_application.project_volume}\n`;
-    resultString += `Статус: ${
-      StatusConvertor[data.key_project_parameters_application.status]
-    }\n\n`;
+    resultString += `Статус: ${StatusConvertor[data.key_project_parameters_application.status]}\n`;
+    data.key_project_parameters_application.project_support_comment
+      ? (resultString += `Коментарий сотрудника поддержки: ${data.key_project_parameters_application.project_support_comment}\n\n`)
+      : (resultString += '\n');
   }
 
   // Problem Application
@@ -145,10 +163,13 @@ const userObjectToShortInfo = (data: application, halls: Halls[]): string => {
     resultString += 'Заявка о проблеме:\n';
     data.problem_application.forEach((application) => {
       resultString += `ID заявки: ${application.problem_application_id}\n`;
-      resultString += `Тип проблемы: ${application.problem_reason}\n`;
+      resultString += `Тип проблемы: ${ProblemTypeConverter[application.problem_reason]}\n`;
       resultString += `Основная проблема: ${application.problem_main}\n`;
       resultString += `Адрес помещения: ${application.problem_adress}\n`;
-      resultString += `Статус: ${StatusConvertor[application.status]}\n\n`;
+      resultString += `Статус: ${StatusConvertor[application.status]}\n`;
+      application.problem_support_comment
+        ? (resultString += `Коментарий сотрудника поддержки: ${application.problem_support_comment}\n\n`)
+        : (resultString += '\n');
     });
   }
 
@@ -166,7 +187,10 @@ const userObjectToShortInfo = (data: application, halls: Halls[]): string => {
       } else {
         resultString += 'Корпус не выбран.\n';
       }
-      resultString += `Статус: ${StatusConvertor[application.status]}\n\n`;
+      resultString += `Статус: ${StatusConvertor[application.status]}\n`;
+      application.area_support_comment
+        ? (resultString += `Коментарий сотрудника поддержки: ${application.area_support_comment}\n\n`)
+        : (resultString += '\n');
     });
   }
   return resultString !== '' ? resultString : 'У вас еще нет ни одной заявки!';

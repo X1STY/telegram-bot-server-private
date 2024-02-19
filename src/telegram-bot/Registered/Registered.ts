@@ -49,7 +49,7 @@ export const Registered = async (
       await MyApplications(bot, call, prisma);
       await ApplyToSupport(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
       return;
     }
@@ -64,7 +64,8 @@ export const Registered = async (
   }
   const user = await findUserById(call.from.id, prisma);
   await bot.sendMessage(chatId, botMessages['RegisteredMenuMessage'].message, {
-    reply_markup: RegisteredUserMenu(user.role)
+    reply_markup: RegisteredUserMenu(user.role),
+    parse_mode: 'Markdown'
   });
   return;
 };

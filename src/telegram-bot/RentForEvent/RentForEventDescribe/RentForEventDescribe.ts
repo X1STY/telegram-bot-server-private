@@ -57,7 +57,8 @@ export const RentForEventDescribeFunc = async (
   } catch (error) {
     if (error.message === 'command') {
       return;
-    } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+    } else
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
 
   if (!user.contact_data || !user.contact_data.email) {
@@ -69,7 +70,10 @@ export const RentForEventDescribeFunc = async (
     } catch (error) {
       if (error.message === 'command') {
         return;
-      } else logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      } else
+        logger.error(
+          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
+        );
     }
   }
 

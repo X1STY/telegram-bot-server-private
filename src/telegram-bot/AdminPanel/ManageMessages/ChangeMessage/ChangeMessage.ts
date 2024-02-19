@@ -25,7 +25,7 @@ export const ChangeMessage = async (bot: TelegramBot, call: TelegramBot.Callback
     ]);
   } catch (error) {
     if (error.message === 'command') return;
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
   arr.push(question, response);
 
@@ -53,7 +53,7 @@ export const ChangeMessage = async (bot: TelegramBot, call: TelegramBot.Callback
     newMessage = await ReplayQuestionCallback(bot, call);
   } catch (error) {
     if (error.message === 'command') return;
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
   arr.push(question, newMessage);
 

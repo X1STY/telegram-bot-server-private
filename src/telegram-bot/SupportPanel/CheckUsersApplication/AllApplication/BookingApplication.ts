@@ -8,7 +8,10 @@ import {
 import { sendToUser } from '@/telegram-bot/messages';
 import { Prisma, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
+import { sendNotification } from '../utils/SendNotification';
+import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
 
+const category = 'Аренда помещений / конференц залов для резидентов';
 const prevState: { [id: number]: application } = {};
 const CALLBACKDATA = `all_booking`;
 type application = Prisma.BookingHallApplicationGetPayload<{
@@ -107,6 +110,15 @@ const BookingApplicationsCorusel = async (
         prevState[call.from.id] = undefined;
         return;
       }
+      if (prevState[call.from.id].status === 'Waiting') {
+        await sendNotification(
+          bot,
+          Number(prevState[call.from.id].user_telegramId),
+          prevState[call.from.id].hall_application_id,
+          category,
+          'PENDING'
+        );
+      }
       await prisma.bookingHallApplication.update({
         data: {
           status: 'Pending',
@@ -114,6 +126,18 @@ const BookingApplicationsCorusel = async (
         },
         where: {
           hall_application_id: prevState[call.from.id].hall_application_id
+        }
+      });
+      prevState[call.from.id] = await prisma.bookingHallApplication.findFirst({
+        where: {
+          hall_application_id: prevState[call.from.id].hall_application_id
+        },
+        include: {
+          user: {
+            include: {
+              contact_data: true
+            }
+          }
         }
       });
       const message = await BookingToLongString(application[selected], prisma);
@@ -132,17 +156,33 @@ const BookingApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_accepted`)) {
-      const selected = call.data.split('-')[1];
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].user_telegramId),
+        prevState[call.from.id].hall_application_id,
+        category,
+        'ACCEPTED',
+        comment.text
+      );
       await prisma.bookingHallApplication.update({
         data: {
           status: 'Accepted',
           hall_support_id: call.from.id,
-          hall_approval_date: new Date()
+          hall_approval_date: new Date(),
+          hall_support_comment: comment.text
         },
         where: {
           hall_application_id: prevState[call.from.id].hall_application_id
         }
       });
+
       await sendToUser({
         bot,
         call,
@@ -154,12 +194,27 @@ const BookingApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_declined`)) {
-      const selected = call.data.split('-')[1];
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].user_telegramId),
+        prevState[call.from.id].hall_application_id,
+        category,
+        'DECLINED',
+        comment.text
+      );
       await prisma.bookingHallApplication.update({
         data: {
           status: 'Declined',
           hall_support_id: call.from.id,
-          hall_approval_date: new Date()
+          hall_approval_date: new Date(),
+          hall_support_comment: comment.text
         },
         where: {
           hall_application_id: prevState[call.from.id].hall_application_id

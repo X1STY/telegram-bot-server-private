@@ -13,15 +13,31 @@ export const ReplayQuestionCallback = async (
 
   while (
     responseMsg.from.id !== call.from.id ||
-    (type !== null && !isValidType(responseMsg.text, type, numberRange))
+    (type !== null && !isValidType(responseMsg, type, numberRange))
   ) {
-    if (responseMsg.from.id === call.from.id) {
-      if (type !== null) {
-        if (!isValidType(responseMsg.text, type, numberRange)) {
-          if (responseMsg.text.startsWith('/')) {
-            throw new Error('command');
+    const msgText = responseMsg.text || responseMsg.caption;
+    if (responseMsg.text) {
+      if (responseMsg.from.id === call.from.id) {
+        if (type !== null) {
+          if (!isValidType(responseMsg, type, numberRange)) {
+            if (responseMsg.text.startsWith('/')) {
+              throw new Error('command');
+            }
+            await bot.sendMessage(call.from.id, getErrorMessage(type, numberRange));
           }
-          await bot.sendMessage(call.from.id, getErrorMessage(type, numberRange));
+        }
+      }
+    }
+    if (responseMsg.photo) {
+      console.log('@', 'sdsds');
+      if (responseMsg.from.id === call.from.id) {
+        if (type !== null) {
+          if (!isValidType(responseMsg, type, numberRange)) {
+            if (responseMsg.caption?.length > 0 && responseMsg.caption?.startsWith('/')) {
+              throw new Error('command');
+            }
+            await bot.sendMessage(call.from.id, getErrorMessage(type, numberRange));
+          }
         }
       }
     }
@@ -31,7 +47,10 @@ export const ReplayQuestionCallback = async (
     });
   }
 
-  if (responseMsg.text.startsWith('/')) {
+  if (
+    (responseMsg.text && responseMsg.text.startsWith('/')) ||
+    (responseMsg.photo && responseMsg.caption?.startsWith('/'))
+  ) {
     throw new Error('command');
   }
 
@@ -39,27 +58,29 @@ export const ReplayQuestionCallback = async (
 };
 
 const isValidType = (
-  value: string,
+  value: TelegramBot.Message,
   type: string,
   numberRange?: [number, number] | null
 ): boolean => {
   switch (type) {
     case 'number':
       return (
-        validator.default.isNumeric(value) && isValidNumberRange(parseFloat(value), numberRange)
+        validator.default.isNumeric(value.text) &&
+        isValidNumberRange(parseFloat(value.text), numberRange)
       );
     case 'date':
-      return validator.default.isDate(value);
+      return validator.default.isDate(value.text);
     case 'email':
-      return validator.default.isEmail(value);
+      return validator.default.isEmail(value.text);
     case 'phone':
-      return validator.default.isMobilePhone(value);
+      return validator.default.isMobilePhone(value.text);
+    case 'photo':
+      return value.photo ? true : false;
     default:
       return true;
   }
 };
 
-// Helper function for sending error messages
 const getErrorMessage = (type: string, numberRange?: [number, number] | null): string => {
   switch (type) {
     case 'number':
@@ -72,6 +93,8 @@ const getErrorMessage = (type: string, numberRange?: [number, number] | null): s
       return 'Некоректный ввод данных. Введите почту в формате login@domain.ru';
     case 'phone':
       return 'Некоректный ввод данных. Введите номер телефона в формате 8(+7)xxxxxxxxxx';
+    case 'photo':
+      return 'Ожидается сообщение с фотографией';
     default:
       return 'Некоректный ввод данных.';
   }

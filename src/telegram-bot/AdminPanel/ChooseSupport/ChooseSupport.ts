@@ -22,7 +22,7 @@ export const ChooseSupport = async (
       await DeleteSupport(bot, call, prisma, state[call.from.id]);
       await CheckSupportStat(bot, call, prisma, state[call.from.id]);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
 
@@ -87,7 +87,7 @@ export const ChooseSupport = async (
     if (error.message === 'command') {
       return;
     }
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
 
   const id = state[call.from.id];

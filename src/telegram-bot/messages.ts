@@ -36,7 +36,7 @@ export const sendToUser = async ({
         }
       );
     } catch (error) {
-      logger.error(call.data + '|' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
   } else {
     try {
@@ -45,14 +45,14 @@ export const sendToUser = async ({
         parse_mode: 'Markdown'
       });
     } catch (error) {
-      logger.error(call.data + '|' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
   }
   if (canPreviousMessageBeDeleted) {
     try {
       await bot.deleteMessage(call.message.chat.id, call.message.message_id);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       if (call.data.startsWith('book_') || call.data.startsWith('rent_for_event_')) {
         throw new Error('command');
       }
@@ -71,6 +71,6 @@ export const MainMenuMessage = async (bot: TelegramBot, call: TelegramBot.Callba
       photo: pathToImageFolder + 'Обложка.png'
     });
   } catch (error) {
-    logger.error(call.data + '|' + error.message);
+    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
 };

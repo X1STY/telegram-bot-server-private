@@ -39,7 +39,7 @@ export const SupportPage = async (
       await CheckUsersApplication(bot, call, prisma);
       await GenerateStatistic(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
       return;
     }

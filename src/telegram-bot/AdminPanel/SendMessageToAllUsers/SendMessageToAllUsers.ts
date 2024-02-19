@@ -90,7 +90,7 @@ const sendInformation = async (
     responseMsg = await ReplayQuestionCallback(bot, call);
   } catch (error) {
     if (error.message === 'command') return;
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
 
   for (let i = 0; i < users.length; i++) {

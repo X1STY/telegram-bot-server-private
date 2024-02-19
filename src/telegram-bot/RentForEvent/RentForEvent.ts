@@ -17,7 +17,7 @@ export const RentForEvent = async (
       await RentForEventManualChoose(bot, call, prisma);
       await RentForEventDescribe(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
 

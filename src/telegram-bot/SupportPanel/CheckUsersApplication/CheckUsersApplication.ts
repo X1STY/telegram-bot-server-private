@@ -3,12 +3,12 @@ import { ApplicationsTypeMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
-import { AllBookingApplications } from './AllBookingApplication/BookingApplication';
-import { AllProblemApplications } from './AllBookingApplication/ProblemApplication';
-import { AllEventApplications } from './AllBookingApplication/RenterApplication';
-import { AllInnovationApplications } from './AllBookingApplication/InnovationApplication';
-import { AllAreaApplications } from './AllBookingApplication/NonResidentRenterApplication';
-import { AllResidentApplications } from './AllBookingApplication/ResidentAppliocation';
+import { AllBookingApplications } from './AllApplication/BookingApplication';
+import { AllProblemApplications } from './AllApplication/ProblemApplication';
+import { AllEventApplications } from './AllApplication/RenterApplication';
+import { AllInnovationApplications } from './AllApplication/InnovationApplication';
+import { AllAreaApplications } from './AllApplication/NonResidentRenterApplication';
+import { AllResidentApplications } from './AllApplication/ResidentAppliocation';
 
 export const CheckUsersApplication = async (
   bot: TelegramBot,
@@ -24,7 +24,7 @@ export const CheckUsersApplication = async (
       await AllAreaApplications(bot, call, prisma);
       await AllResidentApplications(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
       return;
     }

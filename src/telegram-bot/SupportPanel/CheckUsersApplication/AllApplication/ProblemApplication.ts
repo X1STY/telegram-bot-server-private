@@ -8,7 +8,10 @@ import {
 import { sendToUser } from '@/telegram-bot/messages';
 import { Prisma, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
+import { sendNotification } from '../utils/SendNotification';
+import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
 
+const category = 'Неисправности в помещениях ОЭЗ';
 const prevState: { [id: number]: application } = {};
 const CALLBACKDATA = `all_problem`;
 type application = Prisma.ProblemApplicationGetPayload<{
@@ -107,6 +110,16 @@ const ProblemApplicationsCorusel = async (
         prevState[call.from.id] = undefined;
         return;
       }
+
+      if (prevState[call.from.id].status === 'Waiting') {
+        await sendNotification(
+          bot,
+          Number(prevState[call.from.id].user_telegramId),
+          prevState[call.from.id].problem_application_id,
+          category,
+          'PENDING'
+        );
+      }
       await prisma.problemApplication.update({
         data: {
           status: 'Pending',
@@ -116,34 +129,58 @@ const ProblemApplicationsCorusel = async (
           problem_application_id: prevState[call.from.id].problem_application_id
         }
       });
-      const message = await ProblemToLongString(prevState[call.from.id]);
-      await bot.editMessageText(message, {
-        chat_id: call.message.chat.id,
-        message_id: call.message.message_id
-      });
-      await bot.editMessageReplyMarkup(
-        ApplicationCoruselMenu(page, page, CALLBACKDATA, true, Number(selected)),
-        {
-          chat_id: call.message.chat.id,
-          message_id: call.message.message_id
+      prevState[call.from.id] = await prisma.problemApplication.findFirst({
+        where: {
+          problem_application_id: prevState[call.from.id].problem_application_id
+        },
+        include: {
+          user: {
+            include: {
+              contact_data: true
+            }
+          }
         }
-      );
+      });
+
+      const message = await ProblemToLongString(prevState[call.from.id]);
+      await sendToUser({
+        bot,
+        call,
+        message,
+        photo: prevState[call.from.id].photo_id,
+        keyboard: ApplicationCoruselMenu(page, page, CALLBACKDATA, true, Number(selected)),
+        canPreviousMessageBeDeleted: true
+      });
       return;
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_accepted`)) {
-      const selected = call.data.split('-')[1];
-
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
       await prisma.problemApplication.update({
         data: {
           status: 'Accepted',
           problem_support_id: call.from.id,
-          problem_approval_date: new Date()
+          problem_approval_date: new Date(),
+          problem_support_comment: comment.text
         },
         where: {
           problem_application_id: prevState[call.from.id].problem_application_id
         }
       });
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].user_telegramId),
+        prevState[call.from.id].problem_application_id,
+        category,
+        'ACCEPTED',
+        comment.text
+      );
       await sendToUser({
         bot,
         call,
@@ -155,22 +192,39 @@ const ProblemApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_declined`)) {
-      const selected = call.data.split('-')[1];
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].user_telegramId),
+        prevState[call.from.id].problem_application_id,
+        category,
+        'DECLINED',
+        comment.text
+      );
       await prisma.problemApplication.update({
         data: {
           status: 'Declined',
           problem_support_id: call.from.id,
-          problem_approval_date: new Date()
+          problem_approval_date: new Date(),
+          problem_support_comment: comment.text
         },
         where: {
           problem_application_id: prevState[call.from.id].problem_application_id
         }
       });
+
       await sendToUser({
         bot,
         call,
         message: botMessages['ProcessedApplicationMessage'].message,
-        keyboard: SupportPageMenu()
+        keyboard: SupportPageMenu(),
+        canPreviousMessageBeDeleted: false
       });
       prevState[call.from.id] = null;
       return;

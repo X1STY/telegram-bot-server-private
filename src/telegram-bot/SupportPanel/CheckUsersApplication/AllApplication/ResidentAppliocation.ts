@@ -8,7 +8,10 @@ import {
 import { sendToUser } from '@/telegram-bot/messages';
 import { Prisma, PrismaClient, Status } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
+import { sendNotification } from '../utils/SendNotification';
+import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
 
+const category = 'Становление резидентом ОЭЗ';
 const prevState: { [id: number]: application } = {};
 const CALLBACKDATA = `all_residenter`;
 type application = Prisma.UserGetPayload<{
@@ -124,9 +127,39 @@ const ResidentApplicationsCorusel = async (
         prevState[call.from.id] = undefined;
         return;
       }
-
+      if (prevState[call.from.id].key_project_parameters_application.status === 'Waiting') {
+        await sendNotification(
+          bot,
+          Number(prevState[call.from.id].key_project_parameters_application.user_telegramId),
+          prevState[call.from.id].key_project_parameters_application.project_appliocation_id,
+          category,
+          'PENDING'
+        );
+      }
       await updateDatabase(call, 'Pending', prisma);
-
+      prevState[call.from.id] = await prisma.user.findFirst({
+        include: {
+          contact_data: true,
+          key_project_parameters_application: true,
+          building_plans_application: true,
+          rented_area_requests_application: {
+            where: {
+              sended_as: 'RESIDENT'
+            }
+          }
+        },
+        where: {
+          key_project_parameters_application: {
+            project_appliocation_id:
+              prevState[call.from.id].key_project_parameters_application.project_appliocation_id
+          },
+          building_plans_application: {
+            building_plan_id: prevState[call.from.id].building_plans_application?.building_plan_id
+          },
+          telegramId: prevState[call.from.id].telegramId
+        }
+      });
+      console.log(prevState[call.from.id]);
       const message = await ResidentToLongString(prevState[call.from.id]);
       await bot.editMessageText(message, {
         chat_id: call.message.chat.id,
@@ -143,7 +176,22 @@ const ResidentApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_accepted`)) {
-      await updateDatabase(call, 'Accepted', prisma);
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].key_project_parameters_application.user_telegramId),
+        prevState[call.from.id].key_project_parameters_application.project_appliocation_id,
+        category,
+        'ACCEPTED',
+        comment.text
+      );
+      await updateDatabase(call, 'Accepted', prisma, comment.text);
 
       await sendToUser({
         bot,
@@ -156,7 +204,22 @@ const ResidentApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_declined`)) {
-      await updateDatabase(call, 'Declined', prisma);
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].key_project_parameters_application.user_telegramId),
+        prevState[call.from.id].key_project_parameters_application.project_appliocation_id,
+        category,
+        'DECLINED',
+        comment.text
+      );
+      await updateDatabase(call, 'Declined', prisma, comment.text);
 
       await sendToUser({
         bot,
@@ -241,13 +304,15 @@ const ResidentToLongString = async (application: application): Promise<string> =
 const updateDatabase = async (
   call: TelegramBot.CallbackQuery,
   status: Status,
-  prisma: PrismaClient
+  prisma: PrismaClient,
+  comment?: string
 ) => {
   await prisma.keyProjectParametersApplication.update({
     data: {
       status: status,
       project_support_id: call.from.id,
-      project_approval_date: new Date()
+      project_approval_date: new Date(),
+      project_support_comment: comment
     },
     where: {
       project_appliocation_id:
@@ -259,7 +324,8 @@ const updateDatabase = async (
       data: {
         status: status,
         building_support_id: call.from.id,
-        building_approval_date: new Date()
+        building_approval_date: new Date(),
+        building_support_comment: comment
       },
       where: {
         building_plan_id: prevState[call.from.id].building_plans_application.building_plan_id
@@ -270,7 +336,8 @@ const updateDatabase = async (
       data: {
         status: status,
         area_support_id: call.from.id,
-        area_approval_date: new Date()
+        area_approval_date: new Date(),
+        area_support_comment: comment
       },
       where: {
         area_application_id:

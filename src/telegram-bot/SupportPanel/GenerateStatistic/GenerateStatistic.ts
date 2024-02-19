@@ -46,7 +46,7 @@ export const GenerateStatistic = async (
       message: 'Произошла ошибка при генерации файла.',
       canPreviousMessageBeDeleted: false
     });
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
   await bot.answerCallbackQuery(call.id);
 };
@@ -98,7 +98,8 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
     'Статус',
     'Дата отправки заявки',
     'telegramID агента поддержки',
-    'Дата обработки заявки'
+    'Дата обработки заявки',
+    'Комментарий сотрудника'
   ]);
   events.forEach((event) => {
     eventWorkSheet.addRow([
@@ -112,8 +113,9 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
       Number(event.user_telegramId),
       StatusConvertor[event.status],
       event.event_dispatch_date.toLocaleString('ru-RU', options),
-      event.event_support_id ?? 'Не закреплен',
-      event.event_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана'
+      Number(event.event_support_id) ?? 'Не закреплен',
+      event.event_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана',
+      event.event_support_comment ?? 'Нет комментария'
     ]);
   });
 
@@ -130,7 +132,8 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
     'Статус',
     'Дата отправки заявки',
     'telegramID агента поддержки',
-    'Дата обработки заявки'
+    'Дата обработки заявки',
+    'Комментарий сотрудника'
   ]);
   booking.forEach((application) => {
     bookWorksheet.addRow([
@@ -145,8 +148,9 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
       Number(application.user_telegramId),
       StatusConvertor[application.status],
       application.hall_dispatch_date.toLocaleString('ru-RU', options),
-      application.hall_support_id ?? 'Не закреплен',
-      application.hall_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана'
+      Number(application.hall_support_id) ?? 'Не закреплен',
+      application.hall_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана',
+      application.hall_support_comment ?? 'Нет комментария'
     ]);
   });
   const buildWorksheet = workbook.addWorksheet('Заявки - план постройки');
@@ -159,7 +163,8 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
     'Статус',
     'Дата отправки заявки',
     'telegramID агента поддержки',
-    'Дата обработки заявки'
+    'Дата обработки заявки',
+    'Комментарий сотрудника'
   ]);
   building.forEach((application) => {
     buildWorksheet.addRow([
@@ -169,8 +174,9 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
       Number(application.user_telegramId),
       StatusConvertor[application.status],
       application.building_dispatch_date.toLocaleString('ru-RU', options),
-      application.building_support_id ?? 'Не закреплен',
-      application.building_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана'
+      Number(application.building_support_id) ?? 'Не закреплен',
+      application.building_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана',
+      application.building_support_comment ?? 'Нет комментария'
     ]);
   });
 
@@ -185,7 +191,8 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
     'Статус',
     'Дата отправки заявки',
     'telegramID агента поддержки',
-    'Дата обработки заявки'
+    'Дата обработки заявки',
+    'Комментарий сотрудника'
   ]);
   keyProjectApplication.forEach((application) => {
     keyProjectWorksheet.addRow([
@@ -196,8 +203,9 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
       Number(application.user_telegramId),
       StatusConvertor[application.status],
       application.project_dispatch_date.toLocaleString('ru-RU', options),
-      application.project_support_id ?? 'Не закреплен',
-      application.project_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана'
+      Number(application.project_support_id) ?? 'Не закреплен',
+      application.project_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана',
+      application.project_support_comment ?? 'Нет комментария'
     ]);
   });
 
@@ -213,7 +221,8 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
     'Статус',
     'Дата отправки заявки',
     'telegramID агента поддержки',
-    'Дата обработки заявки'
+    'Дата обработки заявки',
+    'Комменатарий сотрудника'
   ]);
   areaApplication.forEach((application) => {
     areaWorksheet.addRow([
@@ -225,8 +234,9 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
       Number(application.user_telegramId),
       StatusConvertor[application.status],
       application.area_dispatch_date.toLocaleString('ru-RU', options),
-      application.area_support_id ?? 'Не закреплен',
-      application.area_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана'
+      Number(application.area_support_id) ?? 'Не закреплен',
+      application.area_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана',
+      application.area_support_comment ?? 'Нет комментария'
     ]);
   });
 
@@ -240,7 +250,8 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
     'Статус',
     'Дата отправки заявки',
     'telegramID агента поддержки',
-    'Дата обработки заявки'
+    'Дата обработки заявки',
+    'Комментарий сотрудника'
   ]);
   problemApplication.forEach((application) => {
     problemWorksheet.addRow([
@@ -250,8 +261,9 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
       Number(application.user_telegramId),
       StatusConvertor[application.status],
       application.problem_dispatch_date.toLocaleString('ru-RU', options),
-      application.problem_support_id ?? 'Не закреплен',
-      application.problem_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана'
+      Number(application.problem_support_id) ?? 'Не закреплен',
+      application.problem_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана',
+      application.problem_support_comment ?? 'Нет комментария'
     ]);
   });
 
@@ -268,7 +280,8 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
     'Статус',
     'Дата отправки заявки',
     'telegramID агента поддержки',
-    'Дата обработки заявки'
+    'Дата обработки заявки',
+    'Комментарий сотрудника'
   ]);
 
   innovationApplication.forEach((application) => {
@@ -282,8 +295,9 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
       Number(application.user_telegramId),
       StatusConvertor[application.status],
       application.innovation_dispatch_date.toLocaleString('ru-RU', options),
-      application.innovation_support_id ?? 'Не закреплен',
-      application.innovation_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана'
+      Number(application.innovation_support_id) ?? 'Не закреплен',
+      application.innovation_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана',
+      application.innovation_support_comment ?? 'Нет комментария'
     ]);
   });
   if (from === 'ADMIN') {
@@ -300,11 +314,11 @@ const fromDatabaseToExcel = async (prisma: PrismaClient, from: string) => {
     ]);
     questions.forEach((application) => {
       questionWorksheet.addRow([
-        application.sender_id,
+        Number(application.sender_id),
         application.question_text,
         StatusConvertor[application.Status],
         application.answer_text ?? 'Нет ответа на вопрос',
-        application.support_id ?? 'Не закреплен',
+        Number(application.support_id) ?? 'Не закреплен',
         application.question_dispatch_date.toLocaleString('ru-RU', options),
         application.question_approval_date?.toLocaleString('ru-RU', options) ?? 'Не обработана'
       ]);

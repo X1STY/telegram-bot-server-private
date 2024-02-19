@@ -8,7 +8,10 @@ import {
 import { sendToUser } from '@/telegram-bot/messages';
 import { Prisma, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
+import { sendNotification } from '../utils/SendNotification';
+import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
 
+const category = 'Становление арендатором-нерезидентом';
 const prevState: { [id: number]: application } = {};
 const CALLBACKDATA = `all_nonresidentrenter`;
 type application = Prisma.RentedAreaRequestsApplicationGetPayload<{
@@ -117,6 +120,15 @@ const AreaApplicationsCorusel = async (
         prevState[call.from.id] = undefined;
         return;
       }
+      if (prevState[call.from.id].status === 'Waiting') {
+        await sendNotification(
+          bot,
+          Number(prevState[call.from.id].user_telegramId),
+          prevState[call.from.id].area_application_id,
+          category,
+          'PENDING'
+        );
+      }
       await prisma.rentedAreaRequestsApplication.update({
         data: {
           status: 'Pending',
@@ -124,6 +136,18 @@ const AreaApplicationsCorusel = async (
         },
         where: {
           area_application_id: prevState[call.from.id].area_application_id
+        }
+      });
+      prevState[call.from.id] = await prisma.rentedAreaRequestsApplication.findFirst({
+        where: {
+          area_application_id: prevState[call.from.id].area_application_id
+        },
+        include: {
+          user: {
+            include: {
+              contact_data: true
+            }
+          }
         }
       });
       const message = await AreaToLongString(prevState[call.from.id]);
@@ -142,11 +166,27 @@ const AreaApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_accepted`)) {
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].user_telegramId),
+        prevState[call.from.id].area_application_id,
+        category,
+        'ACCEPTED',
+        comment.text
+      );
       await prisma.rentedAreaRequestsApplication.update({
         data: {
           status: 'Accepted',
           area_support_id: call.from.id,
-          area_approval_date: new Date()
+          area_approval_date: new Date(),
+          area_support_comment: comment.text
         },
         where: {
           area_application_id: prevState[call.from.id].area_application_id
@@ -163,11 +203,27 @@ const AreaApplicationsCorusel = async (
     }
 
     if (call.data.startsWith(`${CALLBACKDATA}_declined`)) {
+      await sendToUser({
+        bot,
+        call,
+        message: 'Оставьте комментарий для отправителя заявки',
+        canPreviousMessageBeDeleted: false
+      });
+      const comment = await ReplayQuestionCallback(bot, call);
+      await sendNotification(
+        bot,
+        Number(prevState[call.from.id].user_telegramId),
+        prevState[call.from.id].area_application_id,
+        category,
+        'DECLINED',
+        comment.text
+      );
       await prisma.rentedAreaRequestsApplication.update({
         data: {
           status: 'Declined',
           area_support_id: call.from.id,
-          area_approval_date: new Date()
+          area_approval_date: new Date(),
+          area_support_comment: comment.text
         },
         where: {
           area_application_id: prevState[call.from.id].area_application_id

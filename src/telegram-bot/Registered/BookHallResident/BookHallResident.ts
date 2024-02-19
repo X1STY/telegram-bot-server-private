@@ -49,7 +49,9 @@ const RentCorusel = async (
         });
       } catch (error) {
         if (error.message === 'command') return;
-        logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message);
+        logger.error(
+          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
+        );
       }
 
       await sendToUser({
@@ -77,7 +79,7 @@ const RentCorusel = async (
   await sendToUser({
     bot,
     call,
-    photo: Buffer.from(halls[page].photo),
+    photo: halls[page].photo_path,
     message: halls[page].description,
     keyboard: BookHallResidentManualChooseMenu(page, page_count)
   });

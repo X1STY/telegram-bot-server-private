@@ -44,7 +44,7 @@ model User {
 model Halls {
   id Int @default(autoincrement()) @id
   description String
-  photo Bytes
+  photo_path String
 
   booking_hall_application BookingHallApplication[]
   area_expectation_application AreaExpectationsApplication[]
@@ -56,10 +56,12 @@ model ProblemApplication {
   problem_main String
   problem_adress String
   status Status
+  photo_id String?
 
   problem_dispatch_date DateTime
   problem_approval_date DateTime?
   problem_support_id BigInt?
+  problem_support_comment String?
 
   user_telegramId BigInt 
   user User @relation(fields: [user_telegramId], references: [telegramId])
@@ -75,6 +77,7 @@ model AreaExpectationsApplication {
   event_dispatch_date DateTime
   event_approval_date DateTime?
   event_support_id BigInt?
+  event_support_comment String?
 
   chosen_hall_id Int? 
   hall Halls? @relation(fields: [chosen_hall_id], references: [id])
@@ -95,7 +98,7 @@ model RentedAreaRequestsApplication {
   area_dispatch_date DateTime
   area_approval_date DateTime?
   area_support_id BigInt?
-
+  area_support_comment String?
 
   user_telegramId BigInt
   user User @relation(fields: [user_telegramId], references: [telegramId])
@@ -111,6 +114,7 @@ model KeyProjectParametersApplication {
   project_dispatch_date DateTime
   project_approval_date DateTime?
   project_support_id BigInt?
+  project_support_comment String?
 
   user_telegramId BigInt @unique
   user User @relation(fields: [user_telegramId], references: [telegramId])
@@ -125,6 +129,7 @@ model BuildingPlansApplication {
   building_dispatch_date DateTime
   building_approval_date DateTime?
   building_support_id BigInt?
+  building_support_comment String?
 
   user_telegramId BigInt @unique
   user User @relation(fields: [user_telegramId], references: [telegramId])
@@ -141,6 +146,7 @@ model BookingHallApplication {
   hall_dispatch_date DateTime
   hall_approval_date DateTime?
   hall_support_id BigInt?
+  hall_support_comment String?
 
   chosen_hall_id Int
   hall Halls @relation(fields: [chosen_hall_id], references: [id])
@@ -161,6 +167,7 @@ model InnovationProposalApplication {
   innovation_dispatch_date DateTime
   innovation_approval_date DateTime?
   innovation_support_id BigInt?
+  innovation_support_comment String?
 
   user_telegramId BigInt 
   user User @relation(fields: [user_telegramId], references: [telegramId])
