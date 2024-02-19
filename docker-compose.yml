@@ -11,7 +11,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_PASS=root
+      DATABASE_PASS: ${DATABASE_PASSWORD}
     volumes:
       - ./src/constants:/app/src/constants
       - ./static:/app/static
@@ -23,7 +23,7 @@ services:
     volumes:
       - ./.database/postgres/data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=root
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - '5432:5432'
     healthcheck:
