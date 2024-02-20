@@ -5,8 +5,8 @@
 ## Setup environmental variables:
 
 ```bash
-BOT_API=<YOUR TELEGRAM BOT TOKEN>
 DATABASE_PASSWORD=<YOUR DATABASE PASSWORD>
+BOT_API=<YOUR TELEGRAM BOT TOKEN>
 DATABASE_URL=postgres://postgres:${DATABASE_PASSWORD}@db:5432/tg-bot
 ```
 
