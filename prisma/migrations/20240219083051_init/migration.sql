@@ -164,14 +164,6 @@ CREATE TABLE "InnovationProposalApplication" (
 );
 
 -- CreateTable
-CREATE TABLE "Errors" (
-    "id" SERIAL NOT NULL,
-    "error" TEXT NOT NULL,
-
-    CONSTRAINT "Errors_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "QuestionsToSupport" (
     "message_id" INTEGER NOT NULL,
     "sender_id" BIGINT NOT NULL,
