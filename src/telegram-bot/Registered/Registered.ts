@@ -1,13 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { MainMenu, RegisteredUserMenu } from '../markups';
-import { botMessages, findUserById, logger } from '../bot.service';
+import { botMessages, findUserById } from '../bot.service';
 import { MyContacts } from './MyContacts/MyContacts';
 import { SendAProblem } from './SendAProblem/SendAProblem';
 import { InnovationProposal } from './InnovationProposal/InnovationProposal';
 import { BookHallResident } from './BookHallResident/BookHallResident';
 import { MyApplications } from './MyApplications/MyApplications';
 import { ApplyToSupport } from './ApplyToSupport/ApplyToSupport';
+import { handleError } from '@/utils';
 
 export const PreRegistered = async (
   bot: TelegramBot,
@@ -49,7 +50,7 @@ export const Registered = async (
       await MyApplications(bot, call, prisma);
       await ApplyToSupport(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
       return;
     }

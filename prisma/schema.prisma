@@ -173,6 +173,11 @@ model InnovationProposalApplication {
   user User @relation(fields: [user_telegramId], references: [telegramId])
 }
 
+model Errors {
+  id Int @default(autoincrement()) @id
+  error String
+}
+
 model QuestionsToSupport {
   message_id Int @id
   sender_id BigInt

@@ -4,7 +4,8 @@ import { Palaces, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { RealizationType } from './RealizationType/RealizationType';
 import { BackToRegisteredMenu, RealizationTypeMenu } from '@/telegram-bot/markups';
-import { botMessages, findUserById, logger } from '@/telegram-bot/bot.service';
+import { botMessages, findUserById } from '@/telegram-bot/bot.service';
+import { handleError } from '@/utils';
 
 export const ProjectParameters = async (
   bot: TelegramBot,
@@ -65,9 +66,7 @@ export const ProjectParametersFunc = async (
       if (error.message === 'command') {
         return;
       } else {
-        logger.error(
-          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
-        );
+        handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       }
     }
   }

@@ -2,8 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { SupportPageMenu } from '../markups';
 import { CheckUsersApplication } from './CheckUsersApplication/CheckUsersApplication';
-import { botMessages, findUserById, logger } from '../bot.service';
+import { botMessages, findUserById } from '../bot.service';
 import { GenerateStatistic } from './GenerateStatistic/GenerateStatistic';
+import { handleError } from '@/utils';
 
 export const PreSupport = async (
   bot: TelegramBot,
@@ -39,8 +40,7 @@ export const SupportPage = async (
       await CheckUsersApplication(bot, call, prisma);
       await GenerateStatistic(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
-
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
 

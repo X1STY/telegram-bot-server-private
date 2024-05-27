@@ -2,7 +2,7 @@ import { ManageMessagesMenu } from '@/telegram-bot/markups';
 import TelegramBot from 'node-telegram-bot-api';
 import { SeeAllMessages } from './SeeAllMessages/SeeAllMessages';
 import { ChangeMessage } from './ChangeMessage/ChangeMessage';
-import { logger } from '@/telegram-bot/bot.service';
+import { handleError } from '@/utils';
 
 export const ManageMessages = async (bot: TelegramBot, call: TelegramBot.CallbackQuery) => {
   if (call.data !== 'manage_messages') {
@@ -10,7 +10,7 @@ export const ManageMessages = async (bot: TelegramBot, call: TelegramBot.Callbac
       await ChangeMessage(bot, call);
       await SeeAllMessages(bot, call);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
 

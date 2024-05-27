@@ -1,8 +1,9 @@
 import { deleteMessagesFromArray } from '@/telegram-bot/Questionnaire/uitils/DeleteMessages';
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { botMessages, findUserById, logger } from '@/telegram-bot/bot.service';
+import { botMessages, findUserById } from '@/telegram-bot/bot.service';
 import { BackToAdminPanel, BackToRegisteredMenu, ChangeUserDataMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
+import { handleError } from '@/utils';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 
@@ -63,7 +64,7 @@ export const handleChangeData = async (
     if (error.message === 'command') {
       return;
     } else {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
   }
 

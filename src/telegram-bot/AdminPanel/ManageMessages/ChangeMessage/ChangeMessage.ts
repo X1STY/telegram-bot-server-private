@@ -1,8 +1,9 @@
 import { deleteMessagesFromArray } from '@/telegram-bot/Questionnaire/uitils/DeleteMessages';
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { botMessages, logger, updateMessage } from '@/telegram-bot/bot.service';
+import { botMessages, updateMessage } from '@/telegram-bot/bot.service';
 import { BackToAdminPanel } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
+import { handleError } from '@/utils';
 import TelegramBot from 'node-telegram-bot-api';
 
 export const ChangeMessage = async (bot: TelegramBot, call: TelegramBot.CallbackQuery) => {
@@ -25,7 +26,7 @@ export const ChangeMessage = async (bot: TelegramBot, call: TelegramBot.Callback
     ]);
   } catch (error) {
     if (error.message === 'command') return;
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
   arr.push(question, response);
 
@@ -53,7 +54,7 @@ export const ChangeMessage = async (bot: TelegramBot, call: TelegramBot.Callback
     newMessage = await ReplayQuestionCallback(bot, call);
   } catch (error) {
     if (error.message === 'command') return;
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
   arr.push(question, newMessage);
 

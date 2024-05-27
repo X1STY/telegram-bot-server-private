@@ -1,7 +1,8 @@
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { botMessages, logger } from '@/telegram-bot/bot.service';
+import { botMessages } from '@/telegram-bot/bot.service';
 import { BackToRegisteredMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
+import { handleError } from '@/utils';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 
@@ -23,7 +24,7 @@ export const ApplyToSupport = async (
     message = await ReplayQuestionCallback(bot, call);
   } catch (error) {
     if (error.message === 'command') return;
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
 
   await sendToUser({

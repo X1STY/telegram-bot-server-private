@@ -1,7 +1,7 @@
 import axios from 'axios';
 import TelegramBot from 'node-telegram-bot-api';
 import * as fs from 'fs';
-import { logger } from '@/telegram-bot/bot.service';
+import { handleError } from '@/utils';
 
 export const SavePhoto = async (
   bot: TelegramBot,
@@ -18,7 +18,7 @@ export const SavePhoto = async (
     fs.writeFileSync(photoPath, response.data, { flag: 'w' });
     return photoPath;
   } catch (error) {
-    logger.error('Error on save photo from admin panel:' + error);
+    handleError('Error on save photo from admin panel:' + error);
     return;
   }
 };
@@ -26,6 +26,6 @@ export const DeletePhoto = async (filename: string) => {
   try {
     fs.unlinkSync(filename);
   } catch (error) {
-    logger.error('Error on deletion photo from admin panel:' + error);
+    handleError('Error on deletion photo from admin panel:' + error);
   }
 };

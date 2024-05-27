@@ -1,6 +1,6 @@
+import { handleError } from '@/utils';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
-import { logger } from './bot.service';
 
 export const registerNewUser = async (
   call: TelegramBot.CallbackQuery | TelegramBot.Message,
@@ -17,7 +17,7 @@ export const registerNewUser = async (
         }
       });
     } catch (error) {
-      logger.error(call.from.username + ' | ' + error.message);
+      handleError(call.from.username + ' | ' + error.message);
     }
   } else return;
 };

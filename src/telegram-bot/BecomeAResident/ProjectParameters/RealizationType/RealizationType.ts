@@ -2,9 +2,10 @@ import { BuildingPlansQuestionnare } from '@/telegram-bot/Questionnaire/Building
 import { ContactDataWithTitleQuestionnare } from '@/telegram-bot/Questionnaire/ContactDataWithTitle';
 import { RequestedRentAreaQuestionnare } from '@/telegram-bot/Questionnaire/RequestedRentArea';
 import { sendNotification } from '@/telegram-bot/Questionnaire/uitils/SendNotification';
-import { botMessages, logger } from '@/telegram-bot/bot.service';
+import { botMessages } from '@/telegram-bot/bot.service';
 import { BackToRegisteredMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
+import { handleError } from '@/utils';
 import { Palaces, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 
@@ -53,9 +54,7 @@ export const RealizationType = async (
       if (error.message === 'command') {
         return;
       } else
-        logger.error(
-          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
-        );
+        handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
   }
 
@@ -76,9 +75,7 @@ export const RealizationType = async (
       if (error.message === 'command') {
         return;
       } else
-        logger.error(
-          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
-        );
+        handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
   }
 
@@ -102,9 +99,7 @@ export const RealizationType = async (
       if (error.message === 'command') {
         return;
       } else
-        logger.error(
-          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
-        );
+        handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
   }
 

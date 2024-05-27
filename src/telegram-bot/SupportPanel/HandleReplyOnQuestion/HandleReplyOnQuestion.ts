@@ -1,4 +1,5 @@
-import { findUserById, logger } from '@/telegram-bot/bot.service';
+import { findUserById } from '@/telegram-bot/bot.service';
+import { handleError } from '@/utils';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 
@@ -87,7 +88,7 @@ export const HandleReplyOnQuestion = async (
         );
       }
     } catch (error) {
-      logger.error(msg.from.username + ' | ' + msg.text + ' | ' + error.message);
+      handleError(msg.from.username + ' | ' + msg.text + ' | ' + error.message);
       continue;
     }
   }

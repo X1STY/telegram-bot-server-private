@@ -1,4 +1,4 @@
-import { botMessages, findUserById, logger } from '@/telegram-bot/bot.service';
+import { botMessages, findUserById } from '@/telegram-bot/bot.service';
 import { ApplicationsTypeMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
@@ -9,6 +9,7 @@ import { AllEventApplications } from './AllApplication/RenterApplication';
 import { AllInnovationApplications } from './AllApplication/InnovationApplication';
 import { AllAreaApplications } from './AllApplication/NonResidentRenterApplication';
 import { AllResidentApplications } from './AllApplication/ResidentAppliocation';
+import { handleError } from '@/utils';
 
 export const CheckUsersApplication = async (
   bot: TelegramBot,
@@ -24,7 +25,7 @@ export const CheckUsersApplication = async (
       await AllAreaApplications(bot, call, prisma);
       await AllResidentApplications(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
       return;
     }

@@ -1,5 +1,5 @@
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { findUserById, logger } from '@/telegram-bot/bot.service';
+import { findUserById } from '@/telegram-bot/bot.service';
 import { ChosenSupportMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
 import { PrismaClient } from '@prisma/client';
@@ -8,6 +8,7 @@ import { ChangeSupportContacts } from './ChangeSupportContactData/ChangeSupportC
 import { DeleteSupport } from './DeleteSupport/DeleteSupport';
 import { CheckSupportStat } from './CheckSupportStat/CheckSupportStat';
 import { deleteMessagesFromArray } from '@/telegram-bot/Questionnaire/uitils/DeleteMessages';
+import { handleError } from '@/utils';
 
 export const state: { [id: number]: number } = {};
 
@@ -22,7 +23,7 @@ export const ChooseSupport = async (
       await DeleteSupport(bot, call, prisma, state[call.from.id]);
       await CheckSupportStat(bot, call, prisma, state[call.from.id]);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
 
@@ -87,7 +88,7 @@ export const ChooseSupport = async (
     if (error.message === 'command') {
       return;
     }
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
 
   const id = state[call.from.id];

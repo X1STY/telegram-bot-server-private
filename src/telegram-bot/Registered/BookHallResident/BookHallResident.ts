@@ -1,8 +1,9 @@
 import { BookingHallQuestionnare } from '@/telegram-bot/Questionnaire/BookingHall';
 import { sendNotification } from '@/telegram-bot/Questionnaire/uitils/SendNotification';
-import { botMessages, logger } from '@/telegram-bot/bot.service';
+import { botMessages } from '@/telegram-bot/bot.service';
 import { BackToRegisteredMenu, BookHallResidentManualChooseMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
+import { handleError } from '@/utils';
 import { Halls, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 
@@ -49,9 +50,7 @@ const RentCorusel = async (
         });
       } catch (error) {
         if (error.message === 'command') return;
-        logger.error(
-          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
-        );
+        handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       }
 
       await sendToUser({

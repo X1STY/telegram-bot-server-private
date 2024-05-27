@@ -17,6 +17,7 @@ import { PreRegistered, Registered } from './Registered/Registered';
 import { PreSupport, SupportPage } from './SupportPanel/SupportPanel';
 import { HandleReplyOnQuestion } from './SupportPanel/HandleReplyOnQuestion/HandleReplyOnQuestion';
 import { MessageEntry, MessageService } from '@/message.service';
+import { handleError } from '@/utils';
 process.env['NTBA_FIX_350'] = 'true'; // anti deprecated
 
 export let botMessages: { [name: string]: MessageEntry } = {};
@@ -66,8 +67,8 @@ export class BotService implements OnModuleInit {
     const bot = new TelegramBot(process.env.BOT_API, { polling: true });
     bot.setMyCommands(commands);
 
-    bot.on('message', (msg) => {
-      HandleReplyOnQuestion(bot, msg, this.prisma);
+    bot.on('message', async (msg) => {
+      await HandleReplyOnQuestion(bot, msg, this.prisma);
     });
 
     bot.onText(/\/registered/, async (msg) => {
@@ -97,7 +98,7 @@ export class BotService implements OnModuleInit {
       );
     });
     bot.on('polling_error', (msg) => {
-      logger.error('Polling error: ' + msg.message);
+      handleError('Polling error: ' + msg.message);
     });
     bot.on('callback_query', async (call) => {
       logger.debug(call.from.username + ' | ' + call.data);
@@ -119,9 +120,7 @@ export class BotService implements OnModuleInit {
         //
         await backToMainMenuHandler(bot, call);
       } catch (error) {
-        logger.error(
-          call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
-        );
+        handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       }
     });
   };

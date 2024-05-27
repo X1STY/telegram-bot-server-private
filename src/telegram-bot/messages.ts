@@ -1,7 +1,8 @@
 import { pathToImageFolder } from '@/constants';
 import TelegramBot from 'node-telegram-bot-api';
 import { MainMenu } from './markups';
-import { botMessages, logger } from './bot.service';
+import { botMessages } from './bot.service';
+import { handleError } from '@/utils';
 
 interface IMessage {
   bot: TelegramBot;
@@ -36,7 +37,7 @@ export const sendToUser = async ({
         }
       );
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
   } else {
     try {
@@ -45,14 +46,14 @@ export const sendToUser = async ({
         parse_mode: 'Markdown'
       });
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
   }
   if (canPreviousMessageBeDeleted) {
     try {
       await bot.deleteMessage(call.message.chat.id, call.message.message_id);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       if (call.data.startsWith('book_') || call.data.startsWith('rent_for_event_')) {
         throw new Error('command');
       }
@@ -71,6 +72,6 @@ export const MainMenuMessage = async (bot: TelegramBot, call: TelegramBot.Callba
       photo: pathToImageFolder + 'Обложка.png'
     });
   } catch (error) {
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
 };

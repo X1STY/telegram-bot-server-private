@@ -15,7 +15,6 @@ export const ReplayQuestionCallback = async (
     responseMsg.from.id !== call.from.id ||
     (type !== null && !isValidType(responseMsg, type, numberRange))
   ) {
-    const msgText = responseMsg.text || responseMsg.caption;
     if (responseMsg.text) {
       if (responseMsg.from.id === call.from.id) {
         if (type !== null) {

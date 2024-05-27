@@ -3,8 +3,8 @@ import { sendToUser } from '@/telegram-bot/messages';
 import { Halls, PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { RentForEventDescribeFunc } from '../RentForEventDescribe/RentForEventDescribe';
-import { logger } from '@/telegram-bot/bot.service';
 import { HandleChnageData } from '@/telegram-bot/AdminPanel/ManageHalls/ChangeHallData/ChangeHallData';
+import { handleError } from '@/utils';
 
 export const RentForEventManualChoose = async (
   bot: TelegramBot,
@@ -15,7 +15,7 @@ export const RentForEventManualChoose = async (
   try {
     await RentCorusel(bot, call, prisma, Halls, 0, 'rent_for_event');
   } catch (error) {
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
     return;
   }
@@ -43,7 +43,7 @@ export const RentCorusel = async (
         if (error.message === 'command') {
           return;
         } else {
-          logger.error(
+          handleError(
             call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error
           );
         }

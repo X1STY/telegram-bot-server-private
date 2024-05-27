@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { AddNewHall } from './AddNewHall/AddNewHall';
 import { ChangeHallData, HandleChnageDataToChosenHall } from './ChangeHallData/ChangeHallData';
-import { logger } from '@/telegram-bot/bot.service';
+import { handleError } from '@/utils';
 
 export const ManageHalls = async (
   bot: TelegramBot,
@@ -17,7 +17,7 @@ export const ManageHalls = async (
       await ChangeHallData(bot, call, prisma);
       await HandleChnageDataToChosenHall(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
     }
 
     return;

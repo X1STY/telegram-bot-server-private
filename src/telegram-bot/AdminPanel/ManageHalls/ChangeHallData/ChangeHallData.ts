@@ -1,9 +1,10 @@
 import { DeletePhoto, SavePhoto } from '@/telegram-bot/Questionnaire/uitils/HallPhoto';
 import { RentCorusel } from '@/telegram-bot/RentForEvent/RentForEventManualChoose/RentForEventManualChoose';
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { botMessages, logger } from '@/telegram-bot/bot.service';
+import { botMessages } from '@/telegram-bot/bot.service';
 import { BackToAdminPanel, ChangeHallDataHandlerMenu } from '@/telegram-bot/markups';
 import { sendToUser } from '@/telegram-bot/messages';
+import { handleError } from '@/utils';
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 
@@ -16,7 +17,7 @@ export const ChangeHallData = async (
   try {
     await RentCorusel(bot, call, prisma, Halls, 0, 'change_hall_data');
   } catch (error) {
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
     return;
   }
@@ -74,7 +75,7 @@ export const HandleChnageDataToChosenHall = async (
       await SavePhoto(bot, response, hallPictureName);
       await sendToUser({ bot, call, message: 'Успешно изменено', keyboard: BackToAdminPanel() });
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
   }
@@ -92,7 +93,7 @@ export const HandleChnageDataToChosenHall = async (
       });
       await sendToUser({ bot, call, message: 'Успешно изменено', keyboard: BackToAdminPanel() });
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
   }

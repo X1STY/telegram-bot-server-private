@@ -1,12 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
-import { botMessages, findUserById, logger } from '../bot.service';
+import { botMessages, findUserById } from '../bot.service';
 import { AdminPanelMenu } from '../markups';
 import { ManageSupport } from './ManageSupport/ManageSupport';
 import { ChooseSupport } from './ChooseSupport/ChooseSupport';
 import { SendMessageToAllUsers } from './SendMessageToAllUsers/SendMessageToAllUsers';
 import { ManageMessages } from './ManageMessages/ManageMessages';
 import { ManageHalls } from './ManageHalls/ManageHalls';
+import { handleError } from '@/utils';
 
 export const PreAdmin = async (
   bot: TelegramBot,
@@ -45,7 +46,7 @@ export const AdminPage = async (
       await ManageMessages(bot, call);
       await ManageHalls(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
 
       return;
     }

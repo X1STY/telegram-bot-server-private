@@ -2,9 +2,10 @@ import { PrismaClient, Role, User } from '@prisma/client';
 import TelegramBot from 'node-telegram-bot-api';
 import { BackToAdminPanel, SendInfoFiltersMenu } from '@/telegram-bot/markups';
 import { ReplayQuestionCallback } from '@/telegram-bot/ReplyQuestionCallback';
-import { findUserById, logger } from '@/telegram-bot/bot.service';
+import { findUserById } from '@/telegram-bot/bot.service';
 import { sendToUser } from '@/telegram-bot/messages';
 import { RoleConvertor } from '@/constants';
+import { handleError } from '@/utils';
 
 const filters: { [id: number]: Array<Role> } = {};
 
@@ -90,7 +91,7 @@ const sendInformation = async (
     responseMsg = await ReplayQuestionCallback(bot, call);
   } catch (error) {
     if (error.message === 'command') return;
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
 
   for (let i = 0; i < users.length; i++) {

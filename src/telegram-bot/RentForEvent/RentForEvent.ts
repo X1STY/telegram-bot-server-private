@@ -5,7 +5,8 @@ import { MainMenu, RentForEventMenu } from '../markups';
 import { RentForEventManualChoose } from './RentForEventManualChoose/RentForEventManualChoose';
 import { PrismaClient } from '@prisma/client';
 import { RentForEventDescribe } from './RentForEventDescribe/RentForEventDescribe';
-import { botMessages, logger } from '../bot.service';
+import { botMessages } from '../bot.service';
+import { handleError } from '@/utils';
 
 export const RentForEvent = async (
   bot: TelegramBot,
@@ -17,7 +18,7 @@ export const RentForEvent = async (
       await RentForEventManualChoose(bot, call, prisma);
       await RentForEventDescribe(bot, call, prisma);
     } catch (error) {
-      logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+      handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
       return;
     }
 

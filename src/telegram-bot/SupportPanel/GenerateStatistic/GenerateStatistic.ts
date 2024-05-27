@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import * as ExcelJS from 'exceljs';
 import { PalaceConvertor, RoleConvertor, StatusConvertor } from '@/constants';
 import { sendToUser } from '@/telegram-bot/messages';
-import { logger } from '@/telegram-bot/bot.service';
+import { handleError } from '@/utils';
 
 const options = {
   year: 'numeric' as const,
@@ -46,7 +46,7 @@ export const GenerateStatistic = async (
       message: 'Произошла ошибка при генерации файла.',
       canPreviousMessageBeDeleted: false
     });
-    logger.error(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
+    handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);
   }
   await bot.answerCallbackQuery(call.id);
 };
