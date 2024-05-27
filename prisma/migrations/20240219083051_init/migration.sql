@@ -164,6 +164,14 @@ CREATE TABLE "InnovationProposalApplication" (
 );
 
 -- CreateTable
+CREATE TABLE "Errors" (
+    "id" SERIAL NOT NULL,
+    "error" TEXT NOT NULL,
+
+    CONSTRAINT "Errors_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "QuestionsToSupport" (
     "message_id" INTEGER NOT NULL,
     "sender_id" BIGINT NOT NULL,
@@ -233,3 +241,4 @@ ALTER TABLE "QuestionsToSupport" ADD CONSTRAINT "QuestionsToSupport_sender_id_fk
 
 -- AddForeignKey
 ALTER TABLE "QuestionsChatIds" ADD CONSTRAINT "QuestionsChatIds_message_id_fkey" FOREIGN KEY ("message_id") REFERENCES "QuestionsToSupport"("message_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
