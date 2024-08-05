@@ -11,7 +11,10 @@ interface IMessage {
   keyboard?: TelegramBot.InlineKeyboardMarkup;
   photo?: string | Buffer;
   canPreviousMessageBeDeleted?: boolean;
+  parseMode?: IParseMode;
 }
+
+type IParseMode = 'Markdown' | 'MarkdownV2' | 'HTML' | undefined;
 
 export const sendToUser = async ({
   bot,
@@ -19,7 +22,8 @@ export const sendToUser = async ({
   message,
   keyboard,
   photo,
-  canPreviousMessageBeDeleted = true
+  canPreviousMessageBeDeleted = true,
+  parseMode = undefined
 }: IMessage): Promise<TelegramBot.Message | null> => {
   let messageToReturn: TelegramBot.Message;
   if (photo) {
@@ -30,7 +34,7 @@ export const sendToUser = async ({
         {
           reply_markup: keyboard,
           caption: message,
-          parse_mode: 'Markdown'
+          parse_mode: parseMode
         },
         {
           contentType: 'image/png'
@@ -43,7 +47,7 @@ export const sendToUser = async ({
     try {
       messageToReturn = await bot.sendMessage(call.message.chat.id, message, {
         reply_markup: keyboard,
-        parse_mode: 'Markdown'
+        parse_mode: parseMode
       });
     } catch (error) {
       handleError(call.from.username + ' | ' + call.data + ' | ' + error.message + ' | ' + error);

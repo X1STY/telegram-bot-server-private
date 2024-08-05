@@ -13,6 +13,7 @@ export const LandPlots = async (bot: TelegramBot, call: TelegramBot.CallbackQuer
     call,
     photo: pathToImageFolder + 'lands.png',
     message: botMessages['LandPlotsMessage'].message,
+    parseMode: 'Markdown',
     keyboard: BackToSouthMenu()
   });
 };

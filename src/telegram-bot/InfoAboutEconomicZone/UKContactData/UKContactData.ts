@@ -20,6 +20,7 @@ export const UKContactData = async (bot: TelegramBot, call: TelegramBot.Callback
       call,
       photo: pathToImageFolder + '7.png',
       message: botMessages['UKContactDataMessageRegistered'].message,
+      parseMode: 'Markdown',
       keyboard: UKContactDataMenu(from)
     });
   } else {
@@ -28,6 +29,7 @@ export const UKContactData = async (bot: TelegramBot, call: TelegramBot.Callback
       call,
       photo: pathToImageFolder + '7.png',
       message: botMessages['UKContactDataMessage'].message,
+      parseMode: 'Markdown',
       keyboard: UKContactDataMenu(from)
     });
   }
