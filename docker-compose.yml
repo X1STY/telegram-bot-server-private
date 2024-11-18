@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   tg-bot:
     restart: unless-stopped
@@ -14,6 +12,8 @@ services:
     volumes:
       - ./src/constants:/app/src/constants
       - ./static:/app/static
+    networks:
+      - tg-bot-network
   db:
     restart: always
     build:
@@ -25,3 +25,9 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - '5432:5432'
+    networks:
+      - tg-bot-network
+networks:
+  tg-bot-network:
+    driver: bridge
+  
